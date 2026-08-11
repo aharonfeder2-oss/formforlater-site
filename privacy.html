@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form For Later — privacy policy</title>
+<meta name="description" content="What Form For Later stores, what it never stores, what a share link carries, and what leaves your device. Every claim names the file and function that implements it.">
+<style>
+  /* ------------------------------------------------------------------
+     Privacy policy. Same tokens and type as the landing page; this is a
+     document rather than a pitch, so the treatment is quieter — one
+     column, a real measure, and the citations given a form of their own.
+
+     THIS FILE IS THE SOURCE OF TRUTH for the policy. It is published to
+     formforlater.com/privacy by scripts/publish-pages.js. Do not edit the
+     published copy, and do not keep a second copy in Markdown: the whole
+     value of the document is that it matches the code, and a duplicate
+     drifts the first time one is corrected.
+
+     Single theme by choice, every colour painted explicitly. System
+     fonts. No script, no analytics, no external asset.
+     ------------------------------------------------------------------ */
+
+  :root{
+    --ground:#F5F3EE;
+    --surface:#FBFAF7;
+    --sunk:#EFEDE6;
+    --ink:#17211E;
+    --ink-soft:#4A5551;
+    --ink-faint:#6B7671;
+    --rule:#DFDAD1;
+    --rule-strong:#CFC8BC;
+    --accent:#2F6B5B;
+    --accent-wash:#E7EEEA;
+    --brass:#A8702A;
+    --redact:#2A3330;
+
+    --font-display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --font-ui:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-mono:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,Menlo,monospace;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--ground);color:var(--ink-soft);
+    font-family:var(--font-ui);font-size:1.0625rem;line-height:1.68;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  }
+  .page{max-width:1000px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+  .doc{max-width:68ch}
+
+  h1,h2,h3{color:var(--ink);font-family:var(--font-display);font-weight:600;text-wrap:balance}
+  h1{font-size:clamp(2rem,5.2vw,2.75rem);line-height:1.08;letter-spacing:-0.015em;margin:14px 0 0}
+  h2{font-size:1.6rem;line-height:1.2;letter-spacing:-0.01em;margin:0}
+  h3{font-size:1.0625rem;font-family:var(--font-ui);font-weight:650;line-height:1.35;margin:0}
+  p{margin:16px 0 0}
+  ul{margin:14px 0 0;padding-left:22px}
+  li{margin-top:8px}
+  strong,b{color:var(--ink);font-weight:650}
+
+  .eyebrow{
+    display:block;font-size:0.8125rem;font-weight:650;letter-spacing:0.13em;
+    text-transform:uppercase;color:var(--ink-faint);
+  }
+  a{color:var(--accent);text-underline-offset:3px}
+  a:hover{color:var(--ink)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+  code{font-family:var(--font-mono);font-size:0.9em;color:var(--brass);word-break:break-word}
+
+  /* ---- masthead ---- */
+  .masthead{
+    display:flex;align-items:baseline;justify-content:space-between;gap:24px;
+    flex-wrap:wrap;padding:26px 0 0;
+  }
+  .wordmark{font-family:var(--font-display);font-size:1.0625rem;font-weight:600;color:var(--ink);text-decoration:none}
+  .wordmark:hover{color:var(--accent)}
+  .masthead a.back{font-size:0.8125rem;color:var(--ink-faint);text-decoration:none}
+  .masthead a.back:hover{color:var(--ink)}
+
+  header.title{padding:clamp(44px,7vw,76px) 0 0}
+  .stamp{margin-top:14px;font-family:var(--font-mono);font-size:0.8125rem;color:var(--ink-faint)}
+  .intro{font-size:1.1875rem;line-height:1.55;color:var(--ink-soft);margin-top:24px}
+
+  /* ---- contents ---- */
+  .contents{
+    margin-top:36px;padding:20px 22px;background:var(--surface);
+    border:1px solid var(--rule);border-radius:3px;
+  }
+  .contents ol{margin:12px 0 0;padding-left:20px;columns:2;column-gap:32px}
+  .contents li{margin-top:6px;font-size:0.9375rem;break-inside:avoid}
+  @media (max-width:620px){ .contents ol{columns:1} }
+
+  /* ---- sections ---- */
+  section{padding:clamp(40px,6vw,60px) 0 0}
+  .sub{margin-top:32px}
+
+  /* The citation is the signature device of this document: every claim
+     names the file and function that implements it, so the page can be
+     checked instead of believed. Given its own form so it reads as
+     evidence rather than as more prose. */
+  .where{
+    margin-top:16px;padding:10px 0 10px 16px;border-left:2px solid var(--accent-wash);
+    font-size:0.875rem;line-height:1.6;color:var(--ink-faint);
+  }
+  .where b{color:var(--ink-soft);font-weight:650}
+  .where code{color:var(--ink-soft)}
+
+  /* ---- table ---- */
+  .table-wrap{overflow-x:auto;margin-top:20px}
+  table{border-collapse:collapse;width:100%;min-width:460px;font-size:0.9375rem}
+  th,td{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{color:var(--ink);font-weight:650;font-size:0.8125rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)}
+  td code{color:var(--brass)}
+
+  /* ---- callouts ---- */
+  .note{
+    margin-top:24px;padding:18px 20px;background:var(--accent-wash);
+    border-left:3px solid var(--accent);border-radius:0 3px 3px 0;
+  }
+  .note p:first-child{margin-top:0}
+  .plain{
+    margin-top:24px;padding:18px 20px;background:var(--sunk);
+    border:1px solid var(--rule);border-radius:3px;
+  }
+  .plain p:first-child{margin-top:0}
+
+  .never{list-style:none;margin:20px 0 0;padding:0}
+  .never li{position:relative;padding-left:26px;margin-top:12px}
+  .never li::before{
+    content:"";position:absolute;left:0;top:10px;width:9px;height:9px;
+    border-radius:1px;background:var(--redact);
+  }
+
+  footer{
+    margin-top:clamp(56px,8vw,88px);border-top:1px solid var(--rule);
+    padding:30px 0 72px;font-size:0.8125rem;color:var(--ink-faint);
+    display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-between;align-items:baseline;
+  }
+  footer a{color:var(--ink-faint);text-decoration:none}
+  footer a:hover{color:var(--ink)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="masthead">
+    <a class="wordmark" href="/">Form For Later</a>
+    <a class="back" href="/">&larr; Back to the site</a>
+  </div>
+
+  <div class="doc">
+
+    <header class="title">
+      <span class="eyebrow">Privacy policy</span>
+      <h1>What this extension does with what you type.</h1>
+      <p class="stamp">Last updated 11 August 2026 &middot; applies to version 0.1.0</p>
+      <p class="intro">Every claim below is followed by the file and function
+      that implements it, so it can be checked rather than taken on trust.
+      Where something is the browser&rsquo;s behaviour rather than ours, it
+      says so.</p>
+    </header>
+
+    <div class="contents">
+      <span class="eyebrow">On this page</span>
+      <ol>
+        <li><a href="#short">The short version</a></li>
+        <li><a href="#stored">What is stored, and where</a></li>
+        <li><a href="#never-stored">What is never stored</a></li>
+        <li><a href="#pages">What runs on the pages you visit</a></li>
+        <li><a href="#sharing">Sharing</a></li>
+        <li><a href="#export">Exporting</a></li>
+        <li><a href="#uninstall">Uninstalling</a></li>
+        <li><a href="#never">What it never does</a></li>
+        <li><a href="#changes">Changes</a></li>
+      </ol>
+    </div>
+
+    <!-- ============ short version ============ -->
+    <section id="short">
+      <h2>The short version</h2>
+      <p>Form For Later keeps what you have typed into a form so you can put it
+      back later. All of it stays in your browser profile. There is no account,
+      and the extension sends nothing anywhere unless you deliberately create a
+      share link &mdash; and even then, what you share is encrypted before it
+      leaves.</p>
+      <p>We do host one thing: the page a recipient opens to read a share link,
+      so that sharing works without you having to deploy anything. It is a
+      static file, and the part of a link carrying your answers and the key
+      that opens them is the part browsers never send to a server &mdash; so
+      that host cannot see what you shared, and the extension never contacts it
+      at all. This is set out in full, with the reasons it holds, under
+      <a href="#sharing">Sharing</a>.</p>
+      <p>Passwords, card security codes and one-time codes are never written
+      down at all, whatever your settings say.</p>
+    </section>
+
+    <!-- ============ stored ============ -->
+    <section id="stored">
+      <h2>What is stored, and where</h2>
+      <p>Everything lives in <code>chrome.storage.local</code>, the private
+      storage Chrome gives this extension inside your browser profile. Four
+      kinds of thing are kept:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">Key</th><th scope="col">What it holds</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>fk.bundle.&lt;id&gt;</code></td><td>a saved record: the answers you saved and how to find those fields again</td></tr>
+            <tr><td><code>fk.index</code></td><td>a list of records for the sidebar: title, site, dates, counts</td></tr>
+            <tr><td><code>fk.settings</code></td><td>your settings</td></tr>
+            <tr><td><code>fk.deviceId</code></td><td>a random identifier for this browser profile</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The <code>fk.</code> prefix is left over from an earlier name for this
+      extension. It was deliberately not renamed: a build looking under new key
+      names would find no records, report none, and start fresh, while
+      everything already saved sat in the profile under the old names &mdash;
+      unreachable, with no error shown. The names are invisible in use, and
+      nothing is worth that risk.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/storage.js</code> &mdash;
+      the key names at the top of the file, and <code>putBundle</code>.</p>
+
+      <h3 class="sub">What a saved record contains</h3>
+      <p>For each answer you saved: the text you typed and its human-readable
+      form where those differ (the visible text of a chosen dropdown option,
+      for instance), the question&rsquo;s visible label, the heading it sits
+      under, the field&rsquo;s <code>name</code>, <code>id</code>,
+      <code>type</code> and <code>autocomplete</code> attributes, several ways
+      to find that field again on the page, a sensitivity classification, and
+      whether the field was hidden when it was read.</p>
+      <p>For the page itself: its title, its address, the time you saved it,
+      and a few notes about what was found there &mdash; including how many
+      fields were skipped for being too sensitive to keep, and whether part of
+      the page could not be read.</p>
+      <p>The record also carries a copy of the device identifier described
+      below. It is removed from an export, and it is never in a share link.</p>
+
+      <p class="where"><b>Where:</b> <code>src/content/extract.js</code>
+      &mdash; <code>extractPage</code>, the object pushed into
+      <code>fields</code>, and the page object it returns, including
+      <code>notes</code>. <code>src/lib/storage.js</code> &mdash;
+      <code>saveCapture</code>, which stamps the record with the device
+      identifier.</p>
+
+      <p>Alongside those, each saved page keeps a list of the
+      <code>name</code> attributes and visible labels of <strong>every</strong>
+      form field on it, filled in or not. This is what lets a blank form
+      recognise the record belonging to it.</p>
+
+      <p class="where"><b>Where:</b> <code>src/content/extract.js</code>
+      &mdash; <code>formShape</code> and <code>formCaptions</code> in
+      <code>extractPage</code>.</p>
+
+      <div class="note">
+        <p><strong>This means a record includes the address of the page you
+        saved it from.</strong> Only for pages where you pressed Save. Form For
+        Later does not keep a history of pages you merely visit.</p>
+      </div>
+
+      <h3 class="sub">The device identifier</h3>
+      <p><code>fk.deviceId</code> is a random value generated in your browser
+      on install, using the browser&rsquo;s own cryptographic random number
+      generator. It is not derived from anything about you or your machine, it
+      is not an account, and it is never sent anywhere &mdash; it does not
+      appear in a share link.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/storage.js</code> &mdash;
+      <code>getDeviceId</code>; <code>src/lib/util.js</code> &mdash;
+      <code>uid</code>; <code>src/background/service-worker.js</code> &mdash;
+      the <code>onInstalled</code> handler. That it is absent from shares can
+      be checked in <code>src/lib/share.js</code> &mdash;
+      <code>buildSharePayload</code>, which lists exactly what a share
+      contains.</p>
+    </section>
+
+    <!-- ============ never stored ============ -->
+    <section id="never-stored">
+      <h2>What is never stored</h2>
+      <p>Fields classified <code>critical</code> are discarded during reading,
+      before anything is written. That covers:</p>
+      <ul>
+        <li>passwords, passcodes and anything labelled <em>secret</em></li>
+        <li>one-time codes: OTP, 2FA, MFA, verification codes</li>
+        <li>card security codes: CVV, CVC, CSC</li>
+        <li>any field whose <code>type</code> is <code>password</code>, or
+        whose <code>autocomplete</code> is <code>current-password</code>,
+        <code>new-password</code> or <code>cc-csc</code></li>
+      </ul>
+
+      <p class="where"><b>Where:</b> <code>src/lib/sensitive.js</code> &mdash;
+      the <code>RULES</code>, <code>TYPE_LEVEL</code> and
+      <code>AUTOCOMPLETE_LEVEL</code> tables;
+      <code>src/content/extract.js</code> &mdash; the <code>critical</code>
+      check in <code>extractPage</code>, which stops before the field is
+      added.</p>
+
+      <p>Nothing that identifies such a field is kept &mdash; not the value,
+      not its <code>name</code>, not its label. They are also left out of the
+      field lists described above, so a raw dump of storage contains no trace
+      of them.</p>
+
+      <div class="plain">
+        <p><strong>One exception, stated for accuracy:</strong> the record
+        keeps a <em>count</em> of how many fields were skipped this way on each
+        page, so the extension can tell you &ldquo;2 passwords or security
+        codes skipped&rdquo; rather than silently dropping them. The count is a
+        number and nothing else &mdash; no name, no label, no value, nothing
+        that says which fields they were.</p>
+      </div>
+
+      <p class="where"><b>Where:</b> <code>src/content/extract.js</code>
+      &mdash; the <code>critical</code> check sits before
+      <code>shape.add</code>, and increments
+      <code>notes.skippedCritical</code>.</p>
+
+      <p>If a field of this kind ever reaches a record &mdash; through an older
+      record, or a classification rule that changed between versions &mdash; it
+      still cannot be put into a share link, whatever the settings say and
+      whatever you switch on for that field.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/storage.js</code> &mdash;
+      <code>resolveField</code>.</p>
+    </section>
+
+    <!-- ============ what runs ============ -->
+    <section id="pages">
+      <h2>What runs on the pages you visit</h2>
+      <p>Form For Later&rsquo;s reading code is loaded into every page you
+      open, including frames inside those pages. It defines functions and
+      waits; it does not read your form, and sends nothing, until you click the
+      toolbar icon or press the keyboard shortcut.</p>
+
+      <p class="where"><b>Where:</b> <code>manifest.json</code> &mdash; the
+      <code>content_scripts</code> block; <code>src/content/main.js</code>,
+      which only registers a message listener. Reading happens in
+      <code>src/content/extract.js</code> &mdash; <code>extractPage</code>,
+      which nothing calls until the popup or the shortcut asks it to
+      (<code>ui/popup.js</code> &mdash; <code>scan</code>;
+      <code>src/background/service-worker.js</code> &mdash;
+      <code>saveTab</code>).</p>
+
+      <p>The extension makes <strong>one</strong> outbound network request in
+      its entire codebase, described in the next section. There is no
+      analytics, no telemetry, no error reporting, and no remote code: every
+      file it runs ships inside the package.</p>
+
+      <p class="where"><b>Where:</b> searching the packaged extension for
+      <code>fetch(</code>, <code>XMLHttpRequest</code>,
+      <code>sendBeacon</code>, <code>WebSocket</code> or
+      <code>EventSource</code> returns a single result &mdash;
+      <code>src/lib/share.js</code>, in <code>createShare</code>. The build
+      refuses to produce a package where that count is anything other than one
+      (<code>scripts/pack.js</code>), so this claim cannot quietly stop being
+      true.</p>
+    </section>
+
+    <!-- ============ sharing ============ -->
+    <section id="sharing">
+      <h2>Sharing</h2>
+      <p>Nothing is shared until you press the button. Creating a link is a
+      deliberate act in the record viewer, and it is the only thing in the
+      extension that produces something anyone else can read.</p>
+
+      <p>A share link needs a page for the recipient to open, and one is filled
+      in for you so the feature works without any setup:</p>
+      <p><code>https://share.formforlater.com/share.html</code></p>
+      <p>That is a copy of <code>server/share.html</code>, on a domain of ours,
+      served as a static file. Which company operates that server today, and
+      exactly what it can and cannot see, is set out under link-only mode
+      below. You can replace it with your own copy at any time, and clearing
+      the field turns sharing off &mdash; the extension then refuses to build a
+      link rather than falling back to anything.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/storage.js</code> &mdash;
+      <code>SHARE_VIEWER_URL</code> and <code>DEFAULT_SETTINGS</code>;
+      <code>src/lib/share.js</code> &mdash; the first lines of
+      <code>createShare</code>, which throw when the address is empty.</p>
+
+      <p>In both modes, fields you have marked &ldquo;don&rsquo;t share&rdquo;
+      are removed from the data <strong>before</strong> it is encrypted, not
+      hidden afterwards. They are not in the link in any form.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/share.js</code> &mdash;
+      <code>buildSharePayload</code>, which filters before
+      <code>sealJson</code> is called.</p>
+
+      <h3 class="sub">What a share link carries</h3>
+      <p>For each field you left switched on: the visible label, the heading it
+      sits under, the value, its human-readable form where those differ, what
+      kind of field it was, and its sensitivity level. Alongside those, the
+      record&rsquo;s title, <strong>the site&rsquo;s hostname</strong>, when it
+      was saved, the expiry you chose, and the address of each page.</p>
+
+      <p>Two of those you can switch off in the share dialog before you create
+      the link, and the count shown there is built from the same call that
+      builds the payload, so the number you read is the number you send:</p>
+      <ul>
+        <li><strong>Which steps go in.</strong> A record holding several pages
+        of a form offers one checkbox per page. Unticked pages are absent from
+        the encrypted data, not hidden in the viewer.</li>
+        <li><strong>Whether the page addresses go in.</strong> &ldquo;Include
+        the address of each page&rdquo; starts ticked; unticking it sends
+        nothing in place of every address.</li>
+      </ul>
+      <p>Fields you switched off are excluded on every step either way.</p>
+
+      <div class="plain">
+        <p><strong>Unticking the addresses does not hide which site it
+        was.</strong> The record&rsquo;s hostname is part of every share link
+        and there is no control that removes it &mdash; the recipient needs to
+        know what they are looking at. Each page also carries a short
+        identifier derived by hashing its address, used to tell one step of a
+        form from another. If you need somebody to see answers without knowing
+        the service they were typed into, a share link is the wrong tool.</p>
+      </div>
+
+      <p class="where"><b>Where:</b> <code>src/lib/share.js</code> &mdash;
+      <code>buildSharePayload</code>, which lists every field that goes in and
+      drops both switchable items before <code>sealJson</code>;
+      <code>ui/viewer.js</code> &mdash; <code>renderShareForm</code>, which
+      owns the checkboxes and passes <code>pageKeys</code> and
+      <code>includeUrls</code> to <code>createShare</code>. Asserted end to end
+      against decrypted output in <code>test/suites/share.js</code>.</p>
+
+      <p>Everything is encrypted with AES-256-GCM using a key generated fresh
+      for that link, in your browser.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/crypto.js</code> &mdash;
+      <code>generateKey</code> and <code>sealJson</code>.</p>
+
+      <h3 class="sub">Link-only mode (the default)</h3>
+      <p>The encrypted data and the key both live in the part of the link after
+      the <code>#</code>. Browsers never send that part to any server, so
+      <strong>nothing is uploaded</strong>. The link is the data.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/share.js</code> &mdash;
+      <code>fragmentLink</code>.</p>
+
+      <p>Two consequences worth being clear about:</p>
+      <ul>
+        <li>Anyone who has the link can read it. Forwarding the link forwards
+        the data.</li>
+        <li>The expiry date is a request, not a lock. The viewer page checks it
+        and refuses to display anything afterwards, but the encrypted data is
+        already in the recipient&rsquo;s hands and the extension cannot take it
+        back. The interface says this too.</li>
+      </ul>
+
+      <p class="where"><b>Where:</b> <code>server/share.html</code> &mdash; the
+      <code>expiresAt</code> check in <code>main</code>.</p>
+
+      <h3 class="sub">What the share page host can and cannot see</h3>
+      <p>When the recipient opens the link, their browser fetches the viewer
+      page from wherever it is hosted &mdash; by default, from us. It is a
+      static file: there is no code of ours running on that host, no database,
+      and nothing that can be queried after the fact beyond whatever the host
+      logs about serving a file.</p>
+
+      <p><code>formforlater.com</code> is our own domain, and <strong>at the
+      time of writing it points at GitHub Pages</strong> &mdash; so today
+      GitHub operates that server and keeps whatever logs it keeps, not us. The
+      domain is ours precisely so that this can change without breaking links
+      people have already sent; if the host changes, this section is updated
+      with it. What cannot change is the paragraph below, which holds whoever
+      is serving the file.</p>
+
+      <p>It <strong>can</strong> see, as any web server does when a browser
+      asks it for a file: that someone requested that page, their IP address,
+      the time, and their browser&rsquo;s user agent.</p>
+
+      <p>It <strong>cannot</strong> see your answers, the labels, the site the
+      form was on, or the key. All of that is in the part of the link after the
+      <code>#</code>, and <strong>browsers never put the fragment in an HTTP
+      request</strong> &mdash; not in the request line, and not in a
+      <code>Referer</code> header. That is browser behaviour, not a promise of
+      ours. The page then decrypts in the recipient&rsquo;s browser, using a
+      key that reached it through the address bar and is never sent back
+      out.</p>
+
+      <p>Two more things follow from the same fact, and they cut in our
+      favour:</p>
+      <ul>
+        <li><strong>The extension itself never contacts that host at all.</strong>
+        In link-only mode building a link is pure string assembly on your
+        device. The only browser that ever requests the page is the
+        recipient&rsquo;s, when they open the link.</li>
+        <li><strong>We cannot tell who is sharing.</strong> Nothing in the
+        request identifies you, the record, or the extension; the device
+        identifier is not in a share link at all.</li>
+      </ul>
+
+      <p>The page is a plain file you can read, and you do not have to take
+      ours: put your own copy on any static host and paste its address into
+      Settings, and no request goes anywhere near us.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/storage.js</code> &mdash;
+      <code>SHARE_VIEWER_URL</code>; <code>src/lib/share.js</code> &mdash;
+      <code>fragmentLink</code>, which builds a string and makes no request;
+      <code>server/share.html</code> &mdash; the whole file, whose only
+      <code>fetch</code> is the relay branch described below and is not reached
+      at all by a link-only link.</p>
+
+      <h3 class="sub">Relay mode (optional)</h3>
+      <p>If you deploy a relay and enter its address, the encrypted data is
+      uploaded to it and the link carries a short identifier instead. The key
+      stays in the fragment and is never part of the upload.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/share.js</code> &mdash; the
+      relay branch of <code>createShare</code>, whose request body contains
+      only the ciphertext, the chosen lifetime and the one-time flag; and
+      <code>relayLink</code>, which puts the key after the <code>#</code>.</p>
+
+      <div class="note">
+        <p><strong>We do not run a relay.</strong> There is no default address;
+        the setting starts empty and stays empty until you fill it in. If you
+        use one, it is one you or someone you chose deployed.</p>
+      </div>
+
+      <p>This is the one place the two hosted pieces differ, and the difference
+      is the point. We host the share page because it only ever <em>serves</em>
+      a file and can therefore learn nothing. A relay <em>receives an
+      upload</em>, so running one would mean holding other people&rsquo;s
+      ciphertext &mdash; and we would rather not hold it at all than explain
+      why holding it is safe. The share page also needs its own copy to work
+      with a relay: the one we host has no relay address in it, so a relay link
+      opened there is refused rather than fetched.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/storage.js</code> &mdash;
+      <code>DEFAULT_SETTINGS</code>, where <code>relayUrl</code> is
+      <code>''</code>; <code>server/share.html</code> &mdash;
+      <code>RELAY_URL</code>, empty in the published copy, and the &ldquo;Not
+      set up&rdquo; branch in <code>main</code>.</p>
+
+      <p>A relay you deploy <strong>can</strong> see: the encrypted blob, the
+      lifetime you chose, whether you asked for one-time delivery, the random
+      identifier it generated, and &mdash; as any web server does &mdash; the
+      IP address and request headers of whoever uploads or downloads. It
+      <strong>cannot</strong> see your answers, the labels, the site, or the
+      key. It stores bytes it has no way to interpret, because the key never
+      reaches it.</p>
+
+      <p class="where"><b>Where:</b> <code>server/worker.js</code> &mdash; the
+      <code>/put</code> and <code>/get/</code> handlers, which read only
+      <code>payload</code>, <code>ttl</code> and <code>oneTime</code> and never
+      touch a key.</p>
+
+      <p>The relay deletes on a timer, and a one-time link is deleted before
+      the content is handed over, so a failed delete cannot serve it twice.</p>
+
+      <p class="where"><b>Where:</b> <code>server/worker.js</code> &mdash;
+      <code>expirationTtl</code> on the write, and the delete that runs before
+      the response.</p>
+    </section>
+
+    <!-- ============ export ============ -->
+    <section id="export">
+      <h2>Exporting</h2>
+      <p>The <strong>Export file</strong> button in the viewer writes a record
+      to your computer as a JSON file: a plain, unencrypted copy of that
+      record. The device identifier &mdash; the one value that would tie two
+      exports to each other or to your browser profile &mdash; is removed
+      before the file is written. Where the file then goes is up to you, and it
+      is no longer protected by anything once it is on disk.</p>
+
+      <div class="plain">
+        <p><strong>An export ignores your per-field share settings.</strong>
+        Fields marked &ldquo;don&rsquo;t share&rdquo; and answers shown as
+        redaction bars in the viewer are written to the file in full. Those
+        marks govern what goes into a share link; the export is a copy of the
+        whole record, for you. Passwords and security codes are still absent,
+        because they were never stored in the first place.</p>
+      </div>
+
+      <p class="where"><b>Where:</b> <code>ui/viewer.js</code> &mdash; the
+      <code>exportBtn</code> handler, which removes <code>deviceId</code> and
+      serialises everything else.</p>
+    </section>
+
+    <!-- ============ uninstall ============ -->
+    <section id="uninstall">
+      <h2>Uninstalling</h2>
+      <p>Removing the extension deletes its <code>chrome.storage.local</code>
+      data. That is Chrome&rsquo;s behaviour, not something Form For Later
+      implements &mdash; there is no uninstall code in this extension, and no
+      copy anywhere else for us to delete, because there was never a copy
+      anywhere else.</p>
+      <p>You can also delete records at any time: individually in the viewer,
+      or all of them from Settings.</p>
+
+      <p class="where"><b>Where:</b> <code>src/lib/storage.js</code> &mdash;
+      <code>deleteBundle</code>; <code>ui/options.js</code> &mdash; the
+      <code>wipe</code> handler.</p>
+
+      <p>Two things uninstalling does <strong>not</strong> undo:</p>
+      <ul>
+        <li>Share links you already sent. A link-only link keeps working for as
+        long as the share page it points at stays up, because the data is
+        inside the link rather than on any server. That is true of the page we
+        host and of one you host yourself.</li>
+        <li>Files you exported.</li>
+      </ul>
+      <p>Relay entries do expire on their own, whether or not the extension is
+      still installed.</p>
+    </section>
+
+    <!-- ============ never ============ -->
+    <section id="never">
+      <h2>What Form For Later never does</h2>
+      <ul class="never">
+        <li>No account, no sign-in, no profile.</li>
+        <li>No analytics, telemetry, crash reporting or usage measurement.</li>
+        <li>No advertising, and no sale or sharing of data with anyone.</li>
+        <li>No code loaded from the internet at runtime.</li>
+        <li>No transmission of anything, anywhere, except the single upload
+        described under relay mode &mdash; which happens only when you press
+        the button.</li>
+        <li>No request of any kind to the share page we host. The extension
+        never contacts it; only a recipient&rsquo;s browser does, when they
+        open a link you sent them.</li>
+      </ul>
+    </section>
+
+    <!-- ============ changes ============ -->
+    <section id="changes">
+      <h2>Changes</h2>
+      <p>Material changes to this policy are published with the version that
+      makes them, on this page. The date and version at the top say which
+      release it describes.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>Form For Later &mdash; long forms, kept on the device you filled them in on.</span>
+    <span><a href="/">Back to the site</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
