@@ -4,46 +4,50 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Form For Later</title>
-<meta name="description" content="A browser extension that saves a form you are filling in, restores it later, and shares part of it — encrypted, redacted, expiring. Everything stays on your device.">
+<meta name="description" content="FormForLater saves what you type into long forms, puts it back in one click, and can hand part of it to someone else with an encrypted link that expires. Everything stays on your device.">
 <style>
   /* ------------------------------------------------------------------
      Form For Later — landing page.
 
-     Direction: precision instrument, not warm document. The extension
-     itself stays warm on purpose — someone is trusting it with a real
-     form, often under real stress, and that is not the moment for cold
-     restraint. This page's job is different: a stranger decides in
-     seconds whether to trust it at all, and the fastest way to earn that
-     is the same move the privacy policy already makes structurally —
-     show your work, cite the file and function, let it be checked. Cold
-     here is that posture in visual form: near-black ground, one signal
-     colour used sparingly, hairline rules, numbers set like readouts.
+     Direction: glass and neon. Dark ground, frosted panels for the
+     handful of things that are genuinely raised off the page (the hero
+     device, the shared record, the screenshots), and two neon colours
+     used where they carry meaning rather than smeared over everything.
+     Glass is reserved on purpose — if every box on the page is frosted,
+     none of them reads as raised, so plain sections stay plain and flat,
+     same as the instrument-panel pass before this one.
 
-     No gradients, no glow, no decoration that isn't also information.
+     Colour: --neon-blue for anything functional (links, the primary
+     button, the "this landed" states), --neon-violet for anything about
+     handing something to someone else (sharing, the iOS badge). Both were
+     checked against their backgrounds with a WCAG formula, not by eye —
+     see contrast notes below each token.
+
      System fonts only — nothing is fetched over the network, here or
      anywhere else on this page. No script, no analytics, no external
-     asset of any kind. Every drawing is inline SVG.
+     asset of any kind. Every drawing is inline SVG or plain HTML.
      ------------------------------------------------------------------ */
 
   :root{
-    --ground:#0A0C0F;
-    --surface:#101317;
-    --surface-2:#161A1F;
-    --sunk:#06070A;
-    --ink:#E8ECEE;
-    --ink-soft:#99A3AA;
-    --ink-faint:#737D87;
-    --rule:#1B1F24;
-    --rule-strong:#262C33;
+    --ground:#0A0A14;
+    --surface:#12131F;
+    --surface-2:#171829;
+    --sunk:#06060C;
+    --ink:#F3F5FF;
+    --ink-soft:#B9C0DC;     /* 10.9:1 on --ground, 9.7:1 on the composited glass tone */
+    --ink-faint:#9AA3C4;    /* 7.9:1 on --ground, 7.0:1 on glass — still passes 4.5:1 at small sizes */
+    --rule:rgba(255,255,255,0.09);
+    --rule-strong:rgba(255,255,255,0.18);
 
-    /* The one signal colour. Functional uses only — links, the one
-       primary button, focus rings, a handful of readout marks — never a
-       fill, a wash or a gradient. */
-    --accent:#4FD8E8;
-    --accent-dim:#2C7C87;
+    --neon-blue:#4F8CFF;        /* 6.1:1 on --ground — safe for link-sized text */
+    --neon-blue-soft:#8FB4FF;   /* 9.5:1 on --ground — used where blue carries a whole sentence */
+    --neon-violet:#B26CFF;      /* 6.1:1 on --ground */
+    --neon-violet-soft:#C98CFF; /* 8.1:1 on --ground */
+    --on-neon:#0A0A14;          /* dark text set on a solid neon fill — 6.2:1+ either colour */
 
-    --redact:#171B1F;
-    --redact-edge:#262C33;
+    --glass-bg:linear-gradient(155deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025));
+    --glass-border:rgba(255,255,255,0.16);
+    --glass-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.14);
 
     --font-ui:-apple-system,"Segoe UI Variable Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
     --font-mono:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,Menlo,monospace;
@@ -53,7 +57,7 @@
     --step-1:1.3125rem;
     --step-2:1.75rem;
     --step-3:2.375rem;
-    --step-4:clamp(2.375rem,5.6vw,3.5rem);
+    --step-4:clamp(2.375rem,5.8vw,3.75rem);
 
     --measure:60ch;
     --gutter:clamp(20px,5vw,40px);
@@ -63,8 +67,15 @@
   html{-webkit-text-size-adjust:100%}
   body{
     margin:0;
+    /* Soft colour blooms placed down the length of the page rather than
+       one gradient at the top, so the glow keeps showing up as you
+       scroll instead of fading out after the hero. */
     background:
-      repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 96px),
+      radial-gradient(640px circle at 12% 6%, rgba(79,140,255,0.24), transparent 60%),
+      radial-gradient(680px circle at 88% 16%, rgba(178,108,255,0.20), transparent 60%),
+      radial-gradient(600px circle at 20% 46%, rgba(178,108,255,0.14), transparent 60%),
+      radial-gradient(680px circle at 85% 62%, rgba(79,140,255,0.16), transparent 60%),
+      radial-gradient(700px circle at 30% 88%, rgba(79,140,255,0.13), transparent 60%),
       var(--ground);
     color:var(--ink-soft);
     font-family:var(--font-ui);
@@ -74,7 +85,6 @@
     -moz-osx-font-smoothing:grayscale;
   }
 
-  /* Bands are full-width siblings at body level; .page is the inner measure. */
   .page{max-width:1060px;margin:0 auto;padding:0 var(--gutter)}
   .measure{max-width:var(--measure)}
 
@@ -88,15 +98,28 @@
     display:block;font-family:var(--font-mono);font-size:0.75rem;font-weight:600;
     letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);
   }
-  /* The running section count — a readout, not a page number. */
   .band-index{
     font-family:var(--font-mono);font-size:0.75rem;color:var(--ink-faint);
     letter-spacing:0.04em;font-variant-numeric:tabular-nums;
   }
 
-  a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
+  a{color:var(--neon-blue-soft);text-underline-offset:3px;text-decoration-thickness:1px}
   a:hover{color:var(--ink)}
-  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+  :focus-visible{outline:2px solid var(--neon-blue-soft);outline-offset:3px;border-radius:2px}
+
+  /* ---- glass: used only where something is genuinely raised off the
+     page — the hero device, the shared record, screenshots, the iOS
+     card. Everything else (steps, spec rows, scenario lines) stays flat,
+     so the glass keeps meaning "this is lifted up" instead of becoming
+     wallpaper. ---- */
+  .glass{
+    background:var(--glass-bg);
+    -webkit-backdrop-filter:blur(26px) saturate(160%);
+    backdrop-filter:blur(26px) saturate(160%);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow);
+    border-radius:20px;
+  }
 
   /* ---- masthead ---------------------------------------------------- */
   .masthead{
@@ -107,39 +130,117 @@
     font-family:var(--font-ui);font-size:1rem;font-weight:800;
     color:var(--ink);text-decoration:none;letter-spacing:-0.01em;
   }
-  .wordmark:hover{color:var(--accent)}
+  .wordmark:hover{color:var(--neon-blue-soft)}
   .masthead nav{display:flex;gap:22px;font-size:var(--step--1)}
   .masthead nav a{color:var(--ink-faint);text-decoration:none}
   .masthead nav a:hover{color:var(--ink)}
 
-  /* ---- a reusable instrument-panel frame ---------------------------- */
-  /* One bordered, sharp-cornered surface used everywhere something needs
-     to read as a readout rather than a card: the hero diagram, the
-     screenshots, the recipient's-eye record. Repetition is the point. */
-  .panel{
-    border:1px solid var(--rule-strong);border-radius:2px;background:var(--surface);
-  }
-
   /* ---- hero -------------------------------------------------------- */
-  .hero{display:flex;flex-direction:column;gap:clamp(28px,5vw,44px);padding:clamp(48px,8vw,88px) 0 clamp(40px,6vw,64px)}
-  .hero-body{display:flex;flex-direction:column;gap:22px;max-width:56ch}
-  .hero h1 .turn{display:block;color:var(--accent)}
+  .hero{display:flex;flex-direction:column;gap:clamp(28px,5vw,44px);padding:clamp(44px,7vw,80px) 0 clamp(32px,5vw,52px)}
+  .hero-body{display:flex;flex-direction:column;gap:20px;max-width:58ch}
+  .hero h1 .turn{
+    display:block;background:linear-gradient(100deg, var(--neon-blue-soft), var(--neon-violet-soft));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
   .lede{font-size:var(--step-1);line-height:1.5;color:var(--ink-soft)}
 
   .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
   .btn{
-    display:inline-block;padding:12px 20px;border-radius:2px;
+    display:inline-block;padding:13px 22px;border-radius:12px;
     font-size:var(--step--1);font-weight:700;letter-spacing:0.01em;
-    text-decoration:none;border:1px solid transparent;transition:background-color .15s ease,color .15s ease,border-color .15s ease;
+    text-decoration:none;border:1px solid transparent;transition:transform .15s ease,box-shadow .15s ease,background-color .15s ease,border-color .15s ease;
   }
-  .btn-primary{background:var(--accent);color:#06070A;border-color:var(--accent)}
-  .btn-primary:hover{background:#7CE6F0;border-color:#7CE6F0}
-  .btn-quiet{background:transparent;color:var(--ink);border-color:var(--rule-strong)}
-  .btn-quiet:hover{background:var(--surface);border-color:var(--ink-faint);color:var(--ink)}
+  .btn-primary{
+    background:linear-gradient(100deg, var(--neon-blue), #6C7BFF);color:var(--on-neon);
+    box-shadow:0 8px 28px rgba(79,140,255,0.35);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 34px rgba(79,140,255,0.5)}
+  .btn-quiet{background:rgba(255,255,255,0.04);color:var(--ink);border-color:var(--rule-strong)}
+  .btn-quiet:hover{background:rgba(255,255,255,0.08);border-color:var(--ink-faint)}
   .aside{font-size:var(--step--1);color:var(--ink-faint);font-family:var(--font-mono)}
 
-  .hero-art{padding:clamp(16px,3vw,28px);overflow-x:auto}
-  .hero-art svg{width:100%;height:auto;display:block;min-width:420px}
+  /* ---- hero device: an actual-looking form, not a diagram ---------- */
+  .hero-art{padding:clamp(16px,3vw,26px);overflow-x:auto}
+  .device-bar{display:flex;align-items:center;gap:10px;padding:2px 6px 16px}
+  .device-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .device-url{
+    margin-left:8px;display:flex;align-items:center;gap:6px;
+    font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);
+    background:rgba(255,255,255,0.05);border:1px solid var(--rule);border-radius:999px;
+    padding:4px 12px;
+  }
+  .device-url svg{width:10px;height:10px;flex:0 0 auto}
+
+  .states{display:flex;align-items:stretch;gap:14px;min-width:760px}
+  .flow{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 auto;padding-top:34px}
+  .flow svg{width:34px;height:16px;display:block}
+
+  .state{flex:1 1 0;min-width:200px;display:flex;flex-direction:column;gap:10px}
+  .state-badge{
+    align-self:flex-start;font-family:var(--font-mono);font-size:10.5px;font-weight:700;
+    letter-spacing:0.09em;padding:4px 10px;border-radius:999px;color:var(--on-neon);
+  }
+  .state-save .state-badge{background:var(--neon-blue)}
+  .state-restore .state-badge{background:linear-gradient(100deg, var(--neon-blue), var(--neon-violet))}
+  .state-share .state-badge{background:var(--neon-violet)}
+
+  /* The "screen" is a bright, ordinary-looking web page sitting inside the
+     dark glass device — the point is contrast: our chrome is the futuristic
+     part, the form itself should look exactly like every other form you've
+     filled in. */
+  .screen{
+    background:#F4F6FB;border-radius:12px;padding:14px 15px;
+    display:flex;flex-direction:column;gap:11px;
+    box-shadow:0 1px 0 rgba(255,255,255,0.5) inset, 0 12px 30px rgba(0,0,0,0.35);
+  }
+  .state-restore .screen{box-shadow:0 0 0 1.5px rgba(140,120,255,0.55), 0 0 34px rgba(140,120,255,0.35), 0 12px 30px rgba(0,0,0,0.35)}
+  .f{display:flex;flex-direction:column;gap:3px}
+  .f-label{font-size:9.5px;color:#6B7280;font-weight:600}
+  .f-value{
+    font-size:11px;color:#1B2233;background:#fff;border:1px solid #D7DCE8;border-radius:6px;
+    padding:5px 8px;font-family:var(--font-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    position:relative;
+  }
+  .caret{display:inline-block;width:1.5px;height:11px;background:#4F8CFF;margin-left:1px;vertical-align:-2px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+  .f-value.redact{color:transparent;user-select:none;background:#20222E;border-color:#20222E}
+  .f-value.redact::after{
+    content:"";position:absolute;inset:0;border-radius:6px;
+    background:repeating-linear-gradient(-45deg, transparent 0 5px, rgba(255,255,255,0.10) 5px 10px);
+  }
+
+  .share-out{display:flex;align-items:center;gap:8px;padding-top:2px}
+  .share-out svg{width:44px;height:14px}
+  .share-out .node{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--neon-violet-soft);flex:0 0 auto;position:relative}
+  .share-out .node::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--neon-violet-soft)}
+
+  @media (max-width:640px){
+    .states{flex-direction:column;min-width:0}
+    .flow{padding:0;transform:rotate(90deg);align-self:center}
+  }
+
+  /* ---- iOS launch banner --------------------------------------------- */
+  .ios-banner{margin:8px 0 clamp(28px,5vw,44px)}
+  .ios-inner{
+    padding:clamp(24px,4vw,36px);display:flex;gap:clamp(20px,4vw,36px);
+    align-items:center;justify-content:space-between;flex-wrap:wrap;
+  }
+  .ios-copy{display:flex;flex-direction:column;gap:10px;max-width:52ch;flex:1 1 320px}
+  .ios-copy h2{font-size:var(--step-2)}
+  .ios-copy p{color:var(--ink-soft);font-size:var(--step--1)}
+  .ios-badge{
+    display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+    font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:0.09em;
+    color:var(--on-neon);background:var(--neon-violet-soft);padding:4px 10px;border-radius:999px;
+  }
+  .ios-cta{display:flex;flex-direction:column;align-items:flex-start;gap:12px;flex:0 0 auto}
+  .ios-date{
+    display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;
+    background:rgba(178,108,255,0.10);border:1px solid rgba(178,108,255,0.35);
+  }
+  .ios-date svg{width:20px;height:20px;color:var(--neon-violet-soft)}
+  .ios-date b{display:block;font-family:var(--font-mono);font-size:0.9375rem;color:var(--ink);letter-spacing:0.02em}
+  .ios-date span{display:block;font-size:10px;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase}
 
   /* ---- section rhythm ---------------------------------------------- */
   .band{padding:clamp(48px,7vw,80px) 0;border-top:1px solid var(--rule)}
@@ -150,25 +251,27 @@
   /* ---- how it works --------------------------------------------------- */
   .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:clamp(24px,4vw,40px);margin-top:36px}
   .step{display:flex;flex-direction:column;gap:8px}
-  .step-n{font-family:var(--font-mono);font-size:1.5rem;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+  .step-n{font-family:var(--font-mono);font-size:1.5rem;line-height:1;color:var(--neon-blue-soft);font-variant-numeric:tabular-nums}
   .step-rule{height:1px;background:var(--rule-strong);margin:6px 0 4px}
   .step p{font-size:var(--step--1);color:var(--ink-soft);line-height:1.55}
 
   /* ---- the differentiator ------------------------------------------ */
-  .share{background:var(--surface-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .share{background:rgba(255,255,255,0.015);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
   .share-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:start}
   .share-copy{display:flex;flex-direction:column;gap:18px}
   .share-points{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
   .share-points li{position:relative;padding-left:24px;font-size:var(--step--1);color:var(--ink-soft)}
   .share-points li::before{
-    content:"";position:absolute;left:0;top:8px;width:8px;height:8px;
-    background:var(--accent);
+    content:"";position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:2px;
+    background:linear-gradient(135deg, var(--neon-blue), var(--neon-violet));
   }
   .share-points b{color:var(--ink);font-weight:700}
 
   /* The record a recipient sees. Real markup, not a screenshot: the bar
      keeps the length of the answer under it, which is the property the
-     whole redaction idea rests on. */
+     whole redaction idea rests on. This is one of the few flat elements
+     that earns glass — it's meant to feel like a real card someone is
+     holding, lifted above the page. */
   .record{padding:20px 22px 18px;display:flex;flex-direction:column;gap:0}
   .record-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding-bottom:13px;border-bottom:1px solid var(--rule)}
   .record-title{font-family:var(--font-ui);font-size:1rem;color:var(--ink);font-weight:700}
@@ -179,16 +282,16 @@
   .row-val{font-family:var(--font-mono);font-size:13px;color:var(--ink);word-break:break-word}
   .chip{
     font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;
-    color:var(--accent);border:1px solid var(--accent-dim);border-radius:2px;padding:2px 6px;
+    color:var(--on-neon);background:var(--neon-violet-soft);border-radius:999px;padding:2px 8px;
     font-family:var(--font-mono);
   }
   .redact{
-    display:inline-block;position:relative;background:var(--redact);color:transparent;
-    border:1px solid var(--redact-edge);border-radius:2px;padding:1px 4px;user-select:none;
+    display:inline-block;position:relative;background:rgba(6,7,12,0.7);color:transparent;
+    border:1px solid var(--rule-strong);border-radius:4px;padding:1px 4px;user-select:none;
   }
   .redact::after{
-    content:"";position:absolute;inset:0;border-radius:2px;
-    background:repeating-linear-gradient(-45deg,transparent 0 5px,rgba(255,255,255,.05) 5px 10px);
+    content:"";position:absolute;inset:0;border-radius:4px;
+    background:repeating-linear-gradient(-45deg,transparent 0 5px,rgba(255,255,255,.06) 5px 10px);
   }
   .record-foot{margin-top:15px;font-size:12px;color:var(--ink-faint);line-height:1.5}
 
@@ -203,7 +306,7 @@
     display:flex;flex-direction:column;margin-top:8px;
     max-width:var(--measure);
   }
-  .scenario-n{font-family:var(--font-mono);font-size:0.8125rem;color:var(--accent);padding-top:2px;flex:0 0 auto}
+  .scenario-n{font-family:var(--font-mono);font-size:0.8125rem;color:var(--neon-blue-soft);padding-top:2px;flex:0 0 auto}
   .scenario-line{padding:11px 0;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
   .scenario-line:first-of-type{border-top:none}
   .scenario-label{color:var(--ink);font-weight:700;font-size:var(--step--1);flex:0 0 200px}
@@ -223,20 +326,16 @@
   .panel-note{
     margin-top:28px;padding:18px 20px;max-width:var(--measure);
     display:flex;flex-direction:column;gap:10px;
-    border-left:2px solid var(--accent-dim);
+    border-left:2px solid var(--neon-blue);border-radius:0 8px 8px 0;background:rgba(79,140,255,0.05);
   }
   .panel-note p{font-size:var(--step--1);color:var(--ink-soft)}
-  code{font-family:var(--font-mono);font-size:0.92em;color:var(--accent)}
+  code{font-family:var(--font-mono);font-size:0.92em;color:var(--neon-blue-soft)}
 
   /* ---- screenshots ---------------------------------------------------- */
-  /* Real captures of the extension, taken by scripts/screenshots.js against
-     the packaged build — not staged, not touched up. Framed as evidence:
-     each one gets the same hairline panel as everything else on this page,
-     with a mono caption underneath like a figure in a spec sheet. */
   .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:clamp(20px,3vw,32px);margin-top:36px;align-items:start}
   figure{margin:0;display:flex;flex-direction:column;gap:0}
   .shot-frame{padding:12px;display:flex;justify-content:center}
-  .shot-frame img{width:100%;height:auto;display:block;border-radius:1px}
+  .shot-frame img{width:100%;height:auto;display:block;border-radius:8px}
   figcaption{
     padding:10px 12px;border-top:1px solid var(--rule-strong);
     font-family:var(--font-mono);font-size:0.75rem;color:var(--ink-faint);line-height:1.5;
@@ -254,6 +353,8 @@
   @media (max-width:620px){
     .spec-row{grid-template-columns:1fr}
     .masthead{flex-wrap:wrap;gap:10px 24px}
+    .ios-inner{flex-direction:column;align-items:stretch}
+    .ios-cta{align-items:stretch}
   }
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -267,6 +368,7 @@
     <nav>
       <a href="#how">How it works</a>
       <a href="#sharing">Sharing</a>
+      <a href="#ios">iPhone</a>
       <a href="#privacy">Privacy</a>
     </nav>
   </div>
@@ -276,86 +378,113 @@
 <header>
   <div class="page hero">
     <div class="hero-body">
-      <h1>Session timed out.<span class="turn">Answers didn&rsquo;t.</span></h1>
-      <p class="lede">Long forms lose progress. This one keeps it, on your
-      device, until you put it back.</p>
+      <h1>Never lose your progress again! <span class="turn">Pick up exactly where you left off with FormForLater.</span></h1>
+      <p class="lede">It saves what you type into long forms, right on your
+      device. Come back whenever, and put it all back in one click.</p>
       <div class="actions">
         <!-- TODO: Chrome Web Store URL, once the listing is live. -->
         <a class="btn btn-primary" href="#install">Add to Chrome</a>
-        <a class="btn btn-quiet" href="#privacy">Data handling</a>
+        <a class="btn btn-quiet" href="#privacy">How your data's handled</a>
       </div>
-      <p class="aside">FREE &middot; NO ACCOUNT &middot; NOTHING LEAVES WITHOUT YOU</p>
+      <p class="aside">FREE &middot; NO ACCOUNT &middot; YOUR DATA STAYS ON YOUR DEVICE</p>
     </div>
 
-    <!-- The idea in one diagram: a form saved mid-fill, the same partial
-         state returned later, then handed onward with two fields redacted.
-         Exact rects and hairlines rather than the hand-drawn wobble this
-         used to be — precision is the whole point now. -->
-    <div class="hero-art panel" aria-hidden="true">
-      <svg viewBox="0 0 500 210" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
-        <defs>
-          <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
-            <rect width="8" height="8" fill="#171B1F"/>
-            <rect width="4" height="8" fill="#20262C"/>
-          </pattern>
-        </defs>
+    <!-- What actually happens, drawn as a real page rather than an
+         abstract diagram: real labels, real-looking answers, a cursor
+         still mid-word on the last field. Three states, left to right —
+         saved, restored somewhere else, and shared with two fields held
+         back. The redaction bars keep the length of what they cover,
+         same as the real viewer. -->
+    <div class="hero-art glass" aria-hidden="true">
+      <div class="device-bar">
+        <span class="device-dot" style="background:#FF6B6B"></span>
+        <span class="device-dot" style="background:#FFD166"></span>
+        <span class="device-dot" style="background:#4F8CFF"></span>
+        <span class="device-url">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M3 5.5V4a3 3 0 0 1 6 0v1.5" stroke="currentColor" stroke-width="1.1"/><rect x="2.2" y="5.5" width="7.6" height="5.3" rx="1" stroke="currentColor" stroke-width="1.1"/></svg>
+          visaportal.example.gov/apply
+        </span>
+      </div>
 
-        <!-- panel 1: SAVED -->
-        <rect x="10" y="16" width="120" height="136" fill="#0D1013"/>
-        <path d="M10 26 V16 H20 M120 16 H130 V26 M130 142 V152 H120 M20 152 H10 V142" stroke="#262C33" stroke-width="1.5"/>
-        <rect x="22" y="30" width="28" height="3" fill="#262C33"/>
-        <rect x="22" y="39" width="82" height="8" fill="#7A828B"/>
-        <rect x="22" y="62" width="28" height="3" fill="#262C33"/>
-        <rect x="22" y="71" width="64" height="8" fill="#7A828B"/>
-        <rect x="22" y="94" width="28" height="3" fill="#262C33"/>
-        <rect x="22" y="103" width="34" height="8" fill="#7A828B"/>
-        <rect x="59" y="103" width="2" height="8" fill="#4FD8E8"/>
-        <rect x="22" y="126" width="28" height="3" fill="#262C33"/>
-        <line x1="22" y1="130" x2="72" y2="130" stroke="#262C33" stroke-width="1.2" stroke-dasharray="2 3"/>
+      <div class="states">
+        <div class="state state-save">
+          <span class="state-badge">SAVE</span>
+          <div class="screen">
+            <div class="f"><span class="f-label">Full name</span><span class="f-value">Dana Levi</span></div>
+            <div class="f"><span class="f-label">Email address</span><span class="f-value">dana.levi@example.com</span></div>
+            <div class="f"><span class="f-label">Home address</span><span class="f-value">12 Herzl Street, Tel Aviv</span></div>
+            <div class="f"><span class="f-label">Passport number</span><span class="f-value">A04829<span class="caret"></span></span></div>
+          </div>
+        </div>
 
-        <!-- panel 2: RESTORED — identical data, no cursor: it just came back -->
-        <rect x="170" y="16" width="120" height="136" fill="#0D1013"/>
-        <path d="M170 26 V16 H180 M280 16 H290 V26 M290 142 V152 H280 M180 152 H170 V142" stroke="#262C33" stroke-width="1.5"/>
-        <rect x="182" y="30" width="28" height="3" fill="#262C33"/>
-        <rect x="182" y="39" width="82" height="8" fill="#7A828B"/>
-        <rect x="182" y="62" width="28" height="3" fill="#262C33"/>
-        <rect x="182" y="71" width="64" height="8" fill="#7A828B"/>
-        <rect x="182" y="94" width="28" height="3" fill="#262C33"/>
-        <rect x="182" y="103" width="34" height="8" fill="#7A828B"/>
-        <rect x="182" y="126" width="28" height="3" fill="#262C33"/>
-        <line x1="182" y1="130" x2="232" y2="130" stroke="#262C33" stroke-width="1.2" stroke-dasharray="2 3"/>
+        <div class="flow" aria-hidden="true">
+          <svg viewBox="0 0 34 16"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4F8CFF"/><stop offset="1" stop-color="#8F79FF"/></linearGradient></defs>
+            <line x1="0" y1="8" x2="26" y2="8" stroke="url(#g1)" stroke-width="1.6"/>
+            <path d="M26 3 L33 8 L26 13" fill="none" stroke="url(#g1)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+        </div>
 
-        <!-- panel 3: SHARED — finished, two fields held back, sent onward -->
-        <rect x="330" y="16" width="120" height="136" fill="#0D1013"/>
-        <path d="M330 26 V16 H340 M440 16 H450 V26 M450 142 V152 H440 M340 152 H330 V142" stroke="#262C33" stroke-width="1.5"/>
-        <rect x="342" y="30" width="28" height="3" fill="#262C33"/>
-        <rect x="342" y="39" width="82" height="8" fill="#7A828B"/>
-        <rect x="342" y="62" width="28" height="3" fill="#262C33"/>
-        <rect x="342" y="71" width="64" height="8" fill="url(#hatch)" stroke="#262C33" stroke-width="1"/>
-        <rect x="342" y="94" width="28" height="3" fill="#262C33"/>
-        <rect x="342" y="103" width="58" height="8" fill="url(#hatch)" stroke="#262C33" stroke-width="1"/>
-        <rect x="342" y="126" width="28" height="3" fill="#262C33"/>
-        <rect x="342" y="130" width="72" height="8" fill="#7A828B"/>
+        <div class="state state-restore">
+          <span class="state-badge">RESTORE</span>
+          <div class="screen">
+            <div class="f"><span class="f-label">Full name</span><span class="f-value">Dana Levi</span></div>
+            <div class="f"><span class="f-label">Email address</span><span class="f-value">dana.levi@example.com</span></div>
+            <div class="f"><span class="f-label">Home address</span><span class="f-value">12 Herzl Street, Tel Aviv</span></div>
+            <div class="f"><span class="f-label">Passport number</span><span class="f-value">A04829176</span></div>
+          </div>
+        </div>
 
-        <!-- flow: panel to panel -->
-        <line x1="134" y1="84" x2="164" y2="84" stroke="#5B6570" stroke-width="1.4"/>
-        <path d="M164 84 L157 79 L157 89 Z" fill="#5B6570"/>
-        <line x1="294" y1="84" x2="324" y2="84" stroke="#5B6570" stroke-width="1.4"/>
-        <path d="M324 84 L317 79 L317 89 Z" fill="#5B6570"/>
+        <div class="flow" aria-hidden="true">
+          <svg viewBox="0 0 34 16"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8F79FF"/><stop offset="1" stop-color="#B26CFF"/></linearGradient></defs>
+            <line x1="0" y1="8" x2="26" y2="8" stroke="url(#g2)" stroke-width="1.6"/>
+            <path d="M26 3 L33 8 L26 13" fill="none" stroke="url(#g2)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+        </div>
 
-        <!-- handed onward -->
-        <line x1="454" y1="84" x2="480" y2="84" stroke="#4FD8E8" stroke-width="1.5"/>
-        <circle cx="489" cy="84" r="7" fill="none" stroke="#4FD8E8" stroke-width="1.5"/>
-        <circle cx="489" cy="84" r="2" fill="#4FD8E8"/>
-
-        <!-- readout labels -->
-        <text x="70" y="176" text-anchor="middle" font-family="Cascadia Mono, Consolas, monospace" font-size="10" letter-spacing="1.4" fill="#737D87">SAVED</text>
-        <text x="230" y="176" text-anchor="middle" font-family="Cascadia Mono, Consolas, monospace" font-size="10" letter-spacing="1.4" fill="#737D87">RESTORED</text>
-        <text x="390" y="176" text-anchor="middle" font-family="Cascadia Mono, Consolas, monospace" font-size="10" letter-spacing="1.4" fill="#737D87">SHARED</text>
-      </svg>
+        <div class="state state-share">
+          <span class="state-badge">SHARE</span>
+          <div class="screen">
+            <div class="f"><span class="f-label">Full name</span><span class="f-value">Dana Levi</span></div>
+            <div class="f"><span class="f-label">Email address</span><span class="f-value">dana.levi@example.com</span></div>
+            <div class="f"><span class="f-label">Home address</span><span class="f-value redact">12 Herzl Street, Tel Aviv</span></div>
+            <div class="f"><span class="f-label">Passport number</span><span class="f-value redact">A04829176</span></div>
+          </div>
+          <div class="share-out">
+            <svg viewBox="0 0 44 14"><line x1="0" y1="7" x2="34" y2="7" stroke="#B26CFF" stroke-width="1.6"/><path d="M34 3 L42 7 L34 11" fill="none" stroke="#B26CFF" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>
+            <span class="node" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </header>
+
+<!-- ================= iOS launch banner ================= -->
+<div class="page">
+  <section class="ios-banner glass" id="ios">
+    <div class="ios-inner">
+      <div class="ios-copy">
+        <span class="ios-badge">
+          <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><rect x="4" y="1.5" width="8" height="13" rx="1.6" stroke="currentColor" stroke-width="1.3"/><line x1="7" y1="12.3" x2="9" y2="12.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Coming soon
+        </span>
+        <h2>FormForLater is coming to iPhone.</h2>
+        <p>We're launching on the App Store on September 27, 2026. It does
+        the same thing as the extension: saves what you type, so a bad
+        connection or a locked screen never costs you the form again.
+        Leave your email and we'll tell you the day it's live &mdash;
+        nothing else.</p>
+      </div>
+      <div class="ios-cta">
+        <div class="ios-date">
+          <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.3"/><line x1="3" y1="8" x2="17" y2="8" stroke="currentColor" stroke-width="1.3"/><line x1="6.5" y1="2.5" x2="6.5" y2="5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="13.5" y1="2.5" x2="13.5" y2="5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span>App Store launch<b>Sept 27, 2026</b></span>
+        </div>
+        <a class="btn btn-primary" href="/waitlist">Join the waitlist</a>
+      </div>
+    </div>
+  </section>
+</div>
 
 <!-- ================= three steps ================= -->
 <section class="band" id="how">
@@ -365,28 +494,30 @@
         <span class="eyebrow">How it works</span>
         <span class="band-index">01 / 06</span>
       </div>
-      <h2>Save. Wait. Restore.</h2>
+      <h2>Save it. Walk away. Come back.</h2>
     </div>
 
     <div class="steps">
       <div class="step">
         <span class="step-n">01</span>
         <div class="step-rule"></div>
-        <h3>Save what&rsquo;s on screen</h3>
-        <p>One click. Matched by the label you can see, not the field&rsquo;s
-        internal name.</p>
+        <h3>Save what's on screen</h3>
+        <p>One click. FormForLater reads the label you can see, not just
+        the code behind the field.</p>
       </div>
       <div class="step">
         <span class="step-n">02</span>
         <div class="step-rule"></div>
-        <h3>Leave. Come back whenever.</h3>
-        <p>Nothing leaves this device while you&rsquo;re away.</p>
+        <h3>Close the tab, come back whenever</h3>
+        <p>Nothing leaves your device while you're away. No timer, no
+        pressure.</p>
       </div>
       <div class="step">
         <span class="step-n">03</span>
         <div class="step-rule"></div>
         <h3>Restore in one click</h3>
-        <p>Refills every saved answer, and flags the ones it had to guess.</p>
+        <p>Every saved answer goes back where it was, and it tells you if
+        it had to guess.</p>
       </div>
     </div>
   </div>
@@ -401,26 +532,27 @@
           <span class="eyebrow">The part nothing else does</span>
           <span class="band-index">02 / 06</span>
         </div>
-        <h2>Hand off part of a form, not all of it.</h2>
-        <p>Send a link instead of forwarding everything. It&rsquo;s encrypted
-        before it leaves your browser, and you choose what travels, field by
-        field.</p>
+        <h2>Send part of a form, not all of it.</h2>
+        <p>Sometimes someone else needs to see your answers &mdash; an
+        accountant, a caseworker, a relative helping with the paperwork.
+        FormForLater can send them a link instead of forwarding everything.
+        It's encrypted before it leaves your browser, and you pick what's
+        in it, field by field.</p>
 
         <ul class="share-points">
-          <li><b>Encrypted here.</b> AES-256-GCM. The key never leaves the
-          link.</li>
-          <li><b>Expires on schedule.</b> An hour, a day, a week &mdash; and
-          can delete itself on first open.</li>
-          <li><b>No account needed.</b> A link and a browser. Nothing to
-          install.</li>
-          <li><b>Held back, not hidden.</b> Removed before encryption &mdash;
-          never present to leak.</li>
+          <li><b>Encrypted on your device.</b> AES-256-GCM. The key never
+          leaves the link.</li>
+          <li><b>Expires on its own.</b> An hour, a day, a week &mdash; or
+          set it to delete itself after the first open.</li>
+          <li><b>No account needed.</b> Just a link and a browser.</li>
+          <li><b>Left out, not just hidden.</b> Fields you hold back are
+          removed before encryption. They're never in the link at all.</li>
         </ul>
       </div>
 
       <!-- What the recipient actually sees. The bars keep the length of the
-           answers beneath them, so a record stays auditable in public. -->
-      <div class="record panel">
+           answers beneath them, so a record stays checkable in public. -->
+      <div class="record glass">
         <div class="record-head">
           <span class="record-title">Skilled Worker visa</span>
           <span class="record-meta">expires in 23h</span>
@@ -447,8 +579,8 @@
           <span class="row-val">Job offer, start date 4 March</span>
         </div>
 
-        <p class="record-foot">Two answers held back. Their shape stays
-        visible; their content doesn&rsquo;t.</p>
+        <p class="record-foot">Two answers held back. You can still see
+        their shape &mdash; just not what's in them.</p>
       </div>
     </div>
   </div>
@@ -462,7 +594,7 @@
         <span class="eyebrow">Where it fits</span>
         <span class="band-index">03 / 06</span>
       </div>
-      <h2>Three ordinary afternoons.</h2>
+      <h2>Three afternoons this actually saves you.</h2>
     </div>
 
     <!-- A signal that keeps going after a dropout: the line stops, two
@@ -471,9 +603,9 @@
          scenario below, so it is drawn once rather than three times. -->
     <div class="continuity" aria-hidden="true">
       <svg viewBox="0 0 460 56" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
-        <line x1="10" y1="30" x2="185" y2="30" stroke="#262C33" stroke-width="1.5"/>
-        <line x1="217" y1="30" x2="450" y2="30" stroke="#262C33" stroke-width="1.5"/>
-        <g stroke="#5B6570" stroke-width="1.5">
+        <line x1="10" y1="30" x2="185" y2="30" stroke="#2A2C42" stroke-width="1.5"/>
+        <line x1="217" y1="30" x2="450" y2="30" stroke="#2A2C42" stroke-width="1.5"/>
+        <g stroke="#5B5E7E" stroke-width="1.5">
           <line x1="10" y1="27" x2="10" y2="33"/>
           <line x1="50" y1="27" x2="50" y2="33"/>
           <line x1="90" y1="27" x2="90" y2="33"/>
@@ -486,13 +618,13 @@
           <line x1="410" y1="27" x2="410" y2="33"/>
           <line x1="450" y1="27" x2="450" y2="33"/>
         </g>
-        <g stroke="#737D87" stroke-width="1.6" stroke-linecap="round">
+        <g stroke="#9AA3C4" stroke-width="1.6" stroke-linecap="round">
           <line x1="193" y1="22" x2="199" y2="38"/>
           <line x1="203" y1="22" x2="209" y2="38"/>
         </g>
-        <circle cx="185" cy="30" r="3" fill="#2C7C87"/>
-        <circle cx="217" cy="30" r="3.5" fill="#4FD8E8"/>
-        <circle cx="217" cy="30" r="7" fill="none" stroke="#4FD8E8" stroke-width="1" opacity="0.5"/>
+        <circle cx="185" cy="30" r="3" fill="#B26CFF"/>
+        <circle cx="217" cy="30" r="3.5" fill="#4F8CFF"/>
+        <circle cx="217" cy="30" r="7" fill="none" stroke="#4F8CFF" stroke-width="1" opacity="0.5"/>
       </svg>
     </div>
 
@@ -500,17 +632,17 @@
       <div class="scenario-line">
         <span class="scenario-n">01</span>
         <span class="scenario-label">The twelfth application</span>
-        <span class="scenario-detail">Same eight answers. New tracking system.</span>
+        <span class="scenario-detail">Same eight answers again. New site, new tracking number.</span>
       </div>
       <div class="scenario-line">
         <span class="scenario-n">02</span>
-        <span class="scenario-label">On someone&rsquo;s behalf</span>
-        <span class="scenario-detail">You fill in what you know. They check the rest.</span>
+        <span class="scenario-label">On someone's behalf</span>
+        <span class="scenario-detail">You fill in what you know. They check the rest before it's sent.</span>
       </div>
       <div class="scenario-line">
         <span class="scenario-n">03</span>
         <span class="scenario-label">Split across two evenings</span>
-        <span class="scenario-detail">Portal logs you out. Restoring costs one click.</span>
+        <span class="scenario-detail">Portal logs you out. Restoring costs one click, not another hour.</span>
       </div>
     </div>
   </div>
@@ -524,9 +656,10 @@
         <span class="eyebrow">Privacy</span>
         <span class="band-index">04 / 06</span>
       </div>
-      <h2>Verify, don&rsquo;t trust.</h2>
-      <p>Every fact below is cited to a file and a function in the <a
-      href="/privacy">full policy</a> &mdash; checkable, not just claimed.</p>
+      <h2>Nothing here you have to take our word for.</h2>
+      <p>Every line below is backed up in the <a href="/privacy">full
+      policy</a>, with the file and function that actually does it. Go
+      check.</p>
     </div>
 
     <div class="spec">
@@ -540,11 +673,11 @@
       </div>
       <div class="spec-row">
         <span class="spec-key">PASSWORDS</span>
-        <span class="spec-val">discarded before write &mdash; never stored</span>
+        <span class="spec-val">thrown away before they're ever saved</span>
       </div>
       <div class="spec-row">
         <span class="spec-key">NETWORK CALLS</span>
-        <span class="spec-val">one, and only if you deploy the optional relay yourself</span>
+        <span class="spec-val">one, and only if you set up the optional relay yourself</span>
       </div>
       <div class="spec-row">
         <span class="spec-key">ANALYTICS</span>
@@ -556,12 +689,13 @@
       </div>
     </div>
 
-    <div class="panel-note">
+    <div class="panel-note glass">
       <h3>The one thing we do host</h3>
-      <p>A static page a recipient opens to read a share link. It cannot read
-      the link either &mdash; the answers and the key travel in the part
-      browsers never send to a server. Point it at your own copy, or clear it
-      and don&rsquo;t share at all.</p>
+      <p>It's the page a recipient opens to read a share link. It can't
+      read the link either &mdash; the answers and the key travel in the
+      part of the address browsers never send anywhere. Point it at your
+      own copy if you'd rather, or clear the setting and don't share at
+      all.</p>
     </div>
   </div>
 </section>
@@ -571,7 +705,7 @@
   <div class="page">
     <div class="band-head">
       <div class="band-head-row">
-        <span class="eyebrow">Evidence</span>
+        <span class="eyebrow">See it for yourself</span>
         <span class="band-index">05 / 06</span>
       </div>
       <h2>Not a mockup.</h2>
@@ -582,21 +716,21 @@
          way — see NETWORK CALLS above, which this is part of. -->
     <div class="shots">
       <figure>
-        <div class="shot-frame panel">
+        <div class="shot-frame glass">
           <img src="shots/popup.png" width="696" height="866" loading="lazy"
                alt="The Form For Later popup open over a partly filled job application. It reads &ldquo;4 filled answers found&rdquo; above a Save button, with a Restore option below it.">
         </div>
-        <figcaption>THE POPUP &mdash; a real count, one button.</figcaption>
+        <figcaption>THE POPUP &mdash; one button, and a number you can trust.</figcaption>
       </figure>
       <figure>
-        <div class="shot-frame panel">
+        <div class="shot-frame glass">
           <img src="shots/viewer.png" width="2360" height="1800" loading="lazy"
                alt="The Form For Later record viewer showing a two-page &ldquo;Riverside Labs — Software Engineer&rdquo; application. Full name, email, mobile number, date of birth and home address are each hidden behind a hatched redaction bar with its own Hide and Share switch.">
         </div>
-        <figcaption>THE RECORD &mdash; every field, redacted where it should be.</figcaption>
+        <figcaption>THE RECORD &mdash; every field you saved, redacted where you asked.</figcaption>
       </figure>
       <figure>
-        <div class="shot-frame panel">
+        <div class="shot-frame glass">
           <img src="shots/share.png" width="2360" height="1800" loading="lazy"
                alt="The Create a share link dialog, with the record's second page unticked. The tally reads &ldquo;4 answers included, 1 held back, 1 of 2 pages.&rdquo;">
         </div>
@@ -614,14 +748,14 @@
         <span class="eyebrow">Getting it</span>
         <span class="band-index">06 / 06</span>
       </div>
-      <h2>Not published yet.</h2>
-      <p class="measure">In Chrome Web Store review &mdash; this button will
-      point at the listing the day it&rsquo;s live.</p>
+      <h2>Not on the Store yet.</h2>
+      <p class="measure">It's in review. This button goes live the day
+      it's approved.</p>
       <div class="actions">
         <!-- TODO: Chrome Web Store URL. -->
         <a class="btn btn-primary" href="#install">Add to Chrome</a>
       </div>
-      <p class="aside">CHROME 116+ &middot; FIREFOX: POSSIBLE, NOT BUILT</p>
+      <p class="aside">CHROME 116+ &middot; iOS: SEE ABOVE &middot; FIREFOX: MAYBE SOMEDAY</p>
     </div>
   </div>
 </section>
@@ -630,10 +764,9 @@
   <div class="page foot-inner">
     <p class="note">FORM FOR LATER &mdash; KEPT ON THE DEVICE YOU FILLED IT IN ON.</p>
     <nav>
-      <!-- TODO: point "Source" at the repository once it is public. -->
       <a href="/privacy">Privacy policy</a>
+      <a href="/waitlist">iOS waitlist</a>
       <a href="https://share.formforlater.com/">Share links</a>
-      <a href="#install">Source</a>
     </nav>
   </div>
 </footer>

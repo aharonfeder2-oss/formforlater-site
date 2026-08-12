@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FormForLater for iPhone</title>
+<meta name="description" content="FormForLater is coming to the App Store on September 27, 2026. Leave your email and we'll tell you the day it's live — nothing else.">
+<style>
+  /* ------------------------------------------------------------------
+     formforlater.com/waitlist — email capture for the iOS launch.
+
+     Same glass-and-neon system as the rest of the site. One glass card:
+     the form itself, because it's the one thing on this page that's
+     actually raised off it. Everything around it stays flat.
+
+     WAITLIST_ENDPOINT below is a placeholder — see the script at the
+     bottom of this file. Until it's filled in, the form disables itself
+     and says so, the same way Settings handles an empty share address:
+     an empty setting is a real state, not a bug, and it should say what
+     it is rather than pretend to work.
+
+     System fonts only. No analytics, no external asset. The only network
+     request this page ever makes is the POST to WAITLIST_ENDPOINT, and
+     only when you submit the form.
+     ------------------------------------------------------------------ */
+
+  :root{
+    --ground:#0A0A14;
+    --surface:#12131F;
+    --sunk:#06060C;
+    --ink:#F3F5FF;
+    --ink-soft:#B9C0DC;
+    --ink-faint:#9AA3C4;
+    --rule:rgba(255,255,255,0.09);
+    --rule-strong:rgba(255,255,255,0.18);
+
+    --neon-blue:#4F8CFF;
+    --neon-blue-soft:#8FB4FF;
+    --neon-violet:#B26CFF;
+    --neon-violet-soft:#C98CFF;
+    --on-neon:#0A0A14;
+
+    --glass-bg:linear-gradient(155deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025));
+    --glass-border:rgba(255,255,255,0.16);
+    --glass-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.14);
+
+    --bad:#FF8A8A;
+
+    --font-ui:-apple-system,"Segoe UI Variable Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
+    --font-mono:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,Menlo,monospace;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;min-height:100vh;
+    background:
+      radial-gradient(700px circle at 20% 0%, rgba(178,108,255,0.22), transparent 60%),
+      radial-gradient(700px circle at 90% 30%, rgba(79,140,255,0.20), transparent 60%),
+      radial-gradient(700px circle at 30% 95%, rgba(79,140,255,0.14), transparent 60%),
+      var(--ground);
+    color:var(--ink-soft);
+    font-family:var(--font-ui);font-size:1.0625rem;line-height:1.6;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  }
+  .page{max-width:1000px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+
+  h1{
+    color:var(--ink);font-family:var(--font-ui);font-weight:800;letter-spacing:-0.02em;
+    text-wrap:balance;margin:14px 0 0;font-size:clamp(2rem,5.5vw,3rem);line-height:1.08;
+  }
+  p{margin:0}
+  strong,b{color:var(--ink);font-weight:700}
+
+  .eyebrow{
+    display:block;font-family:var(--font-mono);font-size:0.75rem;font-weight:600;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--ink-faint);
+  }
+  a{color:var(--neon-blue-soft);text-underline-offset:3px}
+  a:hover{color:var(--ink)}
+  :focus-visible{outline:2px solid var(--neon-blue-soft);outline-offset:3px;border-radius:2px}
+
+  .masthead{
+    display:flex;align-items:baseline;justify-content:space-between;gap:24px;
+    padding:26px 0 0;
+  }
+  .wordmark{font-family:var(--font-ui);font-size:1rem;font-weight:800;color:var(--ink);text-decoration:none}
+  .wordmark:hover{color:var(--neon-blue-soft)}
+  .masthead a.back{font-size:0.8125rem;color:var(--ink-faint);text-decoration:none;font-family:var(--font-mono)}
+  .masthead a.back:hover{color:var(--ink)}
+
+  .wrap{
+    min-height:calc(100vh - 90px);display:flex;align-items:center;
+    padding:clamp(40px,8vw,72px) 0 60px;
+  }
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:clamp(32px,6vw,72px);align-items:center;width:100%}
+
+  .copy{display:flex;flex-direction:column;gap:16px;max-width:44ch}
+  .lede{font-size:1.1875rem;line-height:1.5;color:var(--ink-soft)}
+  .date-chip{
+    align-self:flex-start;display:flex;align-items:center;gap:8px;margin-top:6px;
+    font-family:var(--font-mono);font-size:0.8125rem;color:var(--ink);
+    background:rgba(178,108,255,0.10);border:1px solid rgba(178,108,255,0.35);
+    padding:8px 14px;border-radius:999px;
+  }
+  .date-chip svg{width:14px;height:14px;color:var(--neon-violet-soft)}
+
+  .card{padding:clamp(24px,4vw,32px);display:flex;flex-direction:column;gap:18px}
+  .card h2{color:var(--ink);font-size:1.125rem;font-weight:800;margin:0;letter-spacing:-0.01em}
+
+  form{display:flex;flex-direction:column;gap:12px}
+  .field label{display:block;font-size:0.8125rem;font-weight:600;color:var(--ink-soft);margin-bottom:7px}
+  .field input[type="email"]{
+    width:100%;padding:13px 14px;border-radius:10px;font-size:1rem;font-family:var(--font-ui);
+    background:rgba(255,255,255,0.05);border:1px solid var(--rule-strong);color:var(--ink);
+  }
+  .field input[type="email"]::placeholder{color:var(--ink-faint)}
+  .field input[type="email"]:focus{outline:2px solid var(--neon-blue-soft);outline-offset:1px;border-color:transparent}
+  .field input[aria-invalid="true"]{border-color:var(--bad)}
+
+  /* Honeypot: present in the DOM and in the tab order of nothing, so a
+     script filling every field trips it while a person filling the form
+     with eyes and a mouse never sees it exists. */
+  .hp{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden}
+
+  .submit{
+    margin-top:4px;padding:13px 20px;border-radius:10px;border:none;cursor:pointer;
+    font-size:0.9375rem;font-weight:700;font-family:var(--font-ui);
+    background:linear-gradient(100deg, var(--neon-blue), #6C7BFF);color:var(--on-neon);
+    box-shadow:0 8px 26px rgba(79,140,255,0.32);transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease;
+  }
+  .submit:hover{transform:translateY(-1px);box-shadow:0 10px 32px rgba(79,140,255,0.46)}
+  .submit:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+  .msg{font-size:0.875rem;line-height:1.5;display:none}
+  .msg.show{display:block}
+  .msg.err{color:var(--bad)}
+  .msg.info{color:var(--ink-faint)}
+
+  .fine{font-size:0.8125rem;color:var(--ink-faint);line-height:1.55}
+
+  .success{display:none;flex-direction:column;gap:10px;align-items:flex-start}
+  .success.show{display:flex}
+  .success .check{
+    width:34px;height:34px;border-radius:50%;background:rgba(79,140,255,0.14);
+    border:1px solid rgba(79,140,255,0.4);display:flex;align-items:center;justify-content:center;
+  }
+  .success .check svg{width:16px;height:16px;color:var(--neon-blue-soft)}
+  .success h2{font-size:1.0625rem}
+  .success p{font-size:0.9375rem;color:var(--ink-soft)}
+
+  footer{
+    border-top:1px solid var(--rule);padding:26px 0 40px;font-size:0.8125rem;color:var(--ink-faint);
+    font-family:var(--font-mono);display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-between;
+  }
+  footer a{color:var(--ink-faint);text-decoration:none}
+  footer a:hover{color:var(--ink)}
+
+  .glass{
+    background:var(--glass-bg);
+    -webkit-backdrop-filter:blur(26px) saturate(160%);
+    backdrop-filter:blur(26px) saturate(160%);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow);
+    border-radius:20px;
+  }
+
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="masthead">
+    <a class="wordmark" href="/">Form For Later</a>
+    <a class="back" href="/">&larr; Back to the site</a>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <div class="copy">
+        <span class="eyebrow">Coming to iPhone</span>
+        <h1>Get FormForLater for iPhone.</h1>
+        <p class="lede">We're launching on the App Store on September 27,
+        2026. It does the same thing as the extension: saves what you
+        type, so a locked screen or a dead battery never costs you the
+        form again.</p>
+        <div class="date-chip">
+          <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.3"/><line x1="3" y1="8" x2="17" y2="8" stroke="currentColor" stroke-width="1.3"/><line x1="6.5" y1="2.5" x2="6.5" y2="5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="13.5" y1="2.5" x2="13.5" y2="5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          App Store launch &mdash; September 27, 2026
+        </div>
+      </div>
+
+      <div class="card glass">
+        <div id="formState">
+          <h2>Join the waitlist</h2>
+          <form id="waitlistForm" novalidate>
+            <div class="field">
+              <label for="email">Email address</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+            </div>
+
+            <!-- Honeypot. Real people never see or fill this in; see the
+                 comment in the stylesheet above. -->
+            <div class="hp" aria-hidden="true">
+              <label for="company">Company</label>
+              <input type="text" id="company" name="company" tabindex="-1" autocomplete="off">
+            </div>
+
+            <p id="formMsg" class="msg" role="alert"></p>
+            <button type="submit" class="submit" id="submitBtn">Join the waitlist</button>
+          </form>
+          <p class="fine">One email, on launch day. No spam, no other
+          lists. Ask to be removed any time &mdash; see the
+          <a href="/privacy#waitlist">privacy policy</a>.</p>
+        </div>
+
+        <div class="success" id="successState">
+          <span class="check" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <h2>You're on the list.</h2>
+          <p>We'll email you the day FormForLater ships on the App Store
+          &mdash; September 27, 2026, or sooner if it's ready early.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="page" style="display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-between;width:100%">
+    <span>FORM FOR LATER &mdash; KEPT ON THE DEVICE YOU FILLED IT IN ON.</span>
+    <a href="/privacy">Privacy policy</a>
+  </div>
+</footer>
+
+<script>
+/* Cloudflare Worker address for the waitlist. Left blank on purpose —
+   see server/waitlist-worker.js and its deploy notes in server/README.md.
+   Until this is set, the form disables itself and says so, rather than
+   silently failing or pretending to work. */
+const WAITLIST_ENDPOINT = "";
+
+(function () {
+  const form = document.getElementById('waitlistForm');
+  const email = document.getElementById('email');
+  const company = document.getElementById('company');
+  const msg = document.getElementById('formMsg');
+  const btn = document.getElementById('submitBtn');
+  const formState = document.getElementById('formState');
+  const successState = document.getElementById('successState');
+
+  function showMsg(text, kind) {
+    msg.textContent = text;
+    msg.className = 'msg show' + (kind ? ' ' + kind : '');
+  }
+  function hideMsg() {
+    msg.className = 'msg';
+  }
+  function looksLikeEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
+  }
+
+  if (!WAITLIST_ENDPOINT) {
+    btn.disabled = true;
+    showMsg("Signups aren't switched on yet. Check back soon.", 'info');
+  }
+
+  form.addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    if (!WAITLIST_ENDPOINT) return;
+
+    const value = email.value.trim();
+    if (!looksLikeEmail(value)) {
+      email.setAttribute('aria-invalid', 'true');
+      showMsg("That doesn't look like an email address.", 'err');
+      email.focus();
+      return;
+    }
+    email.removeAttribute('aria-invalid');
+    hideMsg();
+    btn.disabled = true;
+    btn.textContent = 'Joining…';
+
+    try {
+      const res = await fetch(WAITLIST_ENDPOINT.replace(/\/$/, '') + '/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: value, hp: company.value })
+      });
+
+      if (res.status === 429) {
+        showMsg('Too many tries from here. Wait a minute and try again.', 'err');
+      } else if (res.status === 400) {
+        showMsg("That doesn't look like an email address.", 'err');
+      } else if (res.ok) {
+        formState.style.display = 'none';
+        successState.classList.add('show');
+        return;
+      } else {
+        showMsg('Something went wrong on our end. Try again in a moment.', 'err');
+      }
+    } catch (_) {
+      showMsg("Couldn't reach the server. Check your connection and try again.", 'err');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Join the waitlist';
+  });
+})();
+</script>
+
+</body>
+</html>
