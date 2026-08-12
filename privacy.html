@@ -7,9 +7,11 @@
 <meta name="description" content="What Form For Later stores, what it never stores, what a share link carries, and what leaves your device. Every claim names the file and function that implements it.">
 <style>
   /* ------------------------------------------------------------------
-     Privacy policy. Same tokens and type as the landing page; this is a
-     document rather than a pitch, so the treatment is quieter — one
-     column, a real measure, and the citations given a form of their own.
+     Privacy policy. Same tokens and type as the landing page: precision
+     instrument, not warm document. This page already did the hard part —
+     every claim cited to a file and a function — so the cold system
+     mostly just makes that structure visible: citations read like log
+     lines, the storage table reads like a spec sheet.
 
      THIS FILE IS THE SOURCE OF TRUTH for the policy. It is published to
      formforlater.com/privacy by scripts/publish-pages.js. Do not edit the
@@ -22,21 +24,19 @@
      ------------------------------------------------------------------ */
 
   :root{
-    --ground:#F5F3EE;
-    --surface:#FBFAF7;
-    --sunk:#EFEDE6;
-    --ink:#17211E;
-    --ink-soft:#4A5551;
-    --ink-faint:#6B7671;
-    --rule:#DFDAD1;
-    --rule-strong:#CFC8BC;
-    --accent:#2F6B5B;
-    --accent-wash:#E7EEEA;
-    --brass:#A8702A;
-    --redact:#2A3330;
+    --ground:#0A0C0F;
+    --surface:#101317;
+    --sunk:#06070A;
+    --ink:#E8ECEE;
+    --ink-soft:#99A3AA;
+    --ink-faint:#737D87;
+    --rule:#1B1F24;
+    --rule-strong:#262C33;
+    --accent:#4FD8E8;
+    --accent-dim:#2C7C87;
+    --redact:#171B1F;
 
-    --font-display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
-    --font-ui:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-ui:-apple-system,"Segoe UI Variable Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
     --font-mono:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,Menlo,monospace;
   }
 
@@ -44,97 +44,97 @@
   html{-webkit-text-size-adjust:100%}
   body{
     margin:0;background:var(--ground);color:var(--ink-soft);
-    font-family:var(--font-ui);font-size:1.0625rem;line-height:1.68;
+    font-family:var(--font-ui);font-size:1.0625rem;line-height:1.65;
     -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   }
   .page{max-width:1000px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
   .doc{max-width:68ch}
 
-  h1,h2,h3{color:var(--ink);font-family:var(--font-display);font-weight:600;text-wrap:balance}
-  h1{font-size:clamp(2rem,5.2vw,2.75rem);line-height:1.08;letter-spacing:-0.015em;margin:14px 0 0}
-  h2{font-size:1.6rem;line-height:1.2;letter-spacing:-0.01em;margin:0}
-  h3{font-size:1.0625rem;font-family:var(--font-ui);font-weight:650;line-height:1.35;margin:0}
+  h1,h2,h3{color:var(--ink);font-family:var(--font-ui);font-weight:800;letter-spacing:-0.015em;text-wrap:balance}
+  h1{font-size:clamp(1.9rem,5vw,2.625rem);line-height:1.1;margin:14px 0 0}
+  h2{font-size:1.5rem;line-height:1.2;margin:0}
+  h3{font-size:1.0625rem;font-weight:700;line-height:1.35;margin:0;letter-spacing:-0.005em}
   p{margin:16px 0 0}
   ul{margin:14px 0 0;padding-left:22px}
   li{margin-top:8px}
-  strong,b{color:var(--ink);font-weight:650}
+  strong,b{color:var(--ink);font-weight:700}
 
   .eyebrow{
-    display:block;font-size:0.8125rem;font-weight:650;letter-spacing:0.13em;
+    display:block;font-family:var(--font-mono);font-size:0.75rem;font-weight:600;letter-spacing:0.14em;
     text-transform:uppercase;color:var(--ink-faint);
   }
   a{color:var(--accent);text-underline-offset:3px}
   a:hover{color:var(--ink)}
   :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
-  code{font-family:var(--font-mono);font-size:0.9em;color:var(--brass);word-break:break-word}
+  code{font-family:var(--font-mono);font-size:0.9em;color:var(--accent);word-break:break-word}
 
   /* ---- masthead ---- */
   .masthead{
     display:flex;align-items:baseline;justify-content:space-between;gap:24px;
     flex-wrap:wrap;padding:26px 0 0;
   }
-  .wordmark{font-family:var(--font-display);font-size:1.0625rem;font-weight:600;color:var(--ink);text-decoration:none}
+  .wordmark{font-family:var(--font-ui);font-size:1rem;font-weight:800;color:var(--ink);text-decoration:none}
   .wordmark:hover{color:var(--accent)}
-  .masthead a.back{font-size:0.8125rem;color:var(--ink-faint);text-decoration:none}
+  .masthead a.back{font-size:0.8125rem;color:var(--ink-faint);text-decoration:none;font-family:var(--font-mono)}
   .masthead a.back:hover{color:var(--ink)}
 
-  header.title{padding:clamp(44px,7vw,76px) 0 0}
+  header.title{padding:clamp(40px,7vw,72px) 0 0}
   .stamp{margin-top:14px;font-family:var(--font-mono);font-size:0.8125rem;color:var(--ink-faint)}
-  .intro{font-size:1.1875rem;line-height:1.55;color:var(--ink-soft);margin-top:24px}
+  .intro{font-size:1.1875rem;line-height:1.55;color:var(--ink-soft);margin-top:22px}
 
   /* ---- contents ---- */
   .contents{
-    margin-top:36px;padding:20px 22px;background:var(--surface);
-    border:1px solid var(--rule);border-radius:3px;
+    margin-top:32px;padding:18px 20px;background:var(--surface);
+    border:1px solid var(--rule-strong);border-radius:2px;
   }
   .contents ol{margin:12px 0 0;padding-left:20px;columns:2;column-gap:32px}
   .contents li{margin-top:6px;font-size:0.9375rem;break-inside:avoid}
   @media (max-width:620px){ .contents ol{columns:1} }
 
   /* ---- sections ---- */
-  section{padding:clamp(40px,6vw,60px) 0 0}
-  .sub{margin-top:32px}
+  section{padding:clamp(36px,6vw,56px) 0 0}
+  .sub{margin-top:30px}
 
   /* The citation is the signature device of this document: every claim
      names the file and function that implements it, so the page can be
-     checked instead of believed. Given its own form so it reads as
-     evidence rather than as more prose. */
+     checked instead of believed. Set as a log line — mono, faint, left
+     rule — so it reads as evidence rather than more prose. */
   .where{
-    margin-top:16px;padding:10px 0 10px 16px;border-left:2px solid var(--accent-wash);
-    font-size:0.875rem;line-height:1.6;color:var(--ink-faint);
+    margin-top:14px;padding:9px 0 9px 14px;border-left:2px solid var(--accent-dim);
+    font-family:var(--font-mono);font-size:0.8125rem;line-height:1.65;color:var(--ink-faint);
   }
-  .where b{color:var(--ink-soft);font-weight:650}
+  .where b{color:var(--ink-soft);font-weight:700;font-family:var(--font-ui)}
   .where code{color:var(--ink-soft)}
 
   /* ---- table ---- */
-  .table-wrap{overflow-x:auto;margin-top:20px}
+  .table-wrap{overflow-x:auto;margin-top:18px}
   table{border-collapse:collapse;width:100%;min-width:460px;font-size:0.9375rem}
   th,td{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top}
-  th{color:var(--ink);font-weight:650;font-size:0.8125rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-faint)}
-  td code{color:var(--brass)}
+  th{font-family:var(--font-mono);font-weight:600;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint)}
+  td code{color:var(--accent)}
 
   /* ---- callouts ---- */
   .note{
-    margin-top:24px;padding:18px 20px;background:var(--accent-wash);
-    border-left:3px solid var(--accent);border-radius:0 3px 3px 0;
+    margin-top:22px;padding:16px 18px;background:var(--surface);
+    border-left:2px solid var(--accent-dim);border-radius:0 2px 2px 0;
   }
   .note p:first-child{margin-top:0}
   .plain{
-    margin-top:24px;padding:18px 20px;background:var(--sunk);
-    border:1px solid var(--rule);border-radius:3px;
+    margin-top:22px;padding:16px 18px;background:var(--sunk);
+    border:1px solid var(--rule-strong);border-radius:2px;
   }
   .plain p:first-child{margin-top:0}
 
   .never{list-style:none;margin:20px 0 0;padding:0}
-  .never li{position:relative;padding-left:26px;margin-top:12px}
+  .never li{position:relative;padding-left:24px;margin-top:12px}
   .never li::before{
-    content:"";position:absolute;left:0;top:10px;width:9px;height:9px;
-    border-radius:1px;background:var(--redact);
+    content:"";position:absolute;left:0;top:10px;width:8px;height:8px;
+    background:var(--redact);border:1px solid var(--rule-strong);
   }
 
   footer{
-    margin-top:clamp(56px,8vw,88px);border-top:1px solid var(--rule);
-    padding:30px 0 72px;font-size:0.8125rem;color:var(--ink-faint);
+    margin-top:clamp(52px,8vw,80px);border-top:1px solid var(--rule);
+    padding:28px 0 68px;font-size:0.8125rem;color:var(--ink-faint);font-family:var(--font-mono);
     display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-between;align-items:baseline;
   }
   footer a{color:var(--ink-faint);text-decoration:none}
@@ -158,9 +158,8 @@
       <h1>What this extension does with what you type.</h1>
       <p class="stamp">Last updated 11 August 2026 &middot; applies to version 0.1.0</p>
       <p class="intro">Every claim below is followed by the file and function
-      that implements it, so it can be checked rather than taken on trust.
-      Where something is the browser&rsquo;s behaviour rather than ours, it
-      says so.</p>
+      that implements it &mdash; checkable, not just claimed. Where something
+      is the browser&rsquo;s behaviour rather than ours, it says so.</p>
     </header>
 
     <div class="contents">
@@ -181,18 +180,15 @@
     <!-- ============ short version ============ -->
     <section id="short">
       <h2>The short version</h2>
-      <p>Form For Later keeps what you have typed into a form so you can put it
-      back later. All of it stays in your browser profile. There is no account,
-      and the extension sends nothing anywhere unless you deliberately create a
-      share link &mdash; and even then, what you share is encrypted before it
-      leaves.</p>
-      <p>We do host one thing: the page a recipient opens to read a share link,
-      so that sharing works without you having to deploy anything. It is a
-      static file, and the part of a link carrying your answers and the key
-      that opens them is the part browsers never send to a server &mdash; so
-      that host cannot see what you shared, and the extension never contacts it
-      at all. This is set out in full, with the reasons it holds, under
-      <a href="#sharing">Sharing</a>.</p>
+      <p>Form For Later keeps what you type into a form so you can put it back
+      later, entirely in your browser profile. There is no account, and
+      nothing is sent anywhere unless you deliberately create a share link
+      &mdash; encrypted before it leaves.</p>
+      <p>We do host one thing: the page a recipient opens to read a share
+      link, so sharing works without you deploying anything. It is a static
+      file, and the part of a link carrying your answers and the key is the
+      part browsers never send to a server &mdash; so that host cannot see
+      what you shared. Full reasoning under <a href="#sharing">Sharing</a>.</p>
       <p>Passwords, card security codes and one-time codes are never written
       down at all, whatever your settings say.</p>
     </section>

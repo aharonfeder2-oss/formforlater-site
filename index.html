@@ -4,47 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Form For Later</title>
-<meta name="description" content="A browser extension that keeps what you have typed into a long form, puts it back in one click, and hands it to someone you trust with an encrypted link that expires. Everything stays on your device.">
+<meta name="description" content="A browser extension that saves a form you are filling in, restores it later, and shares part of it — encrypted, redacted, expiring. Everything stays on your device.">
 <style>
   /* ------------------------------------------------------------------
      Form For Later — landing page.
 
-     Deliberately single-theme. The extension and the share viewer are
-     dark, because they show somebody's real answers and should feel
-     private; this page is marketing, and light. Every colour is painted
-     explicitly rather than inherited, so the page holds whatever ground
-     the browser or OS puts behind it. That is a choice, not an omission.
+     Direction: precision instrument, not warm document. The extension
+     itself stays warm on purpose — someone is trusting it with a real
+     form, often under real stress, and that is not the moment for cold
+     restraint. This page's job is different: a stranger decides in
+     seconds whether to trust it at all, and the fastest way to earn that
+     is the same move the privacy policy already makes structurally —
+     show your work, cite the file and function, let it be checked. Cold
+     here is that posture in visual form: near-black ground, one signal
+     colour used sparingly, hairline rules, numbers set like readouts.
 
+     No gradients, no glow, no decoration that isn't also information.
      System fonts only — nothing is fetched over the network, here or
      anywhere else on this page. No script, no analytics, no external
-     asset of any kind. The drawing is inline SVG.
+     asset of any kind. Every drawing is inline SVG.
      ------------------------------------------------------------------ */
 
   :root{
-    /* Neutrals biased green rather than yellow, so they sit with the
-       accent instead of drifting toward cream. */
-    --ground:#F5F3EE;
-    --surface:#FBFAF7;
-    --sunk:#EFEDE6;
-    --ink:#17211E;
-    --ink-soft:#4A5551;
-    --ink-faint:#6B7671;
-    --rule:#DFDAD1;
-    --rule-strong:#CFC8BC;
+    --ground:#0A0C0F;
+    --surface:#101317;
+    --surface-2:#161A1F;
+    --sunk:#06070A;
+    --ink:#E8ECEE;
+    --ink-soft:#99A3AA;
+    --ink-faint:#737D87;
+    --rule:#1B1F24;
+    --rule-strong:#262C33;
 
-    /* Verdigris is the extension's "this answer came back" colour, dropped
-       in value until it carries text on a light ground (5.5:1). */
-    --accent:#2F6B5B;
-    --accent-deep:#24544817;
-    --accent-wash:#E7EEEA;
-    --brass:#A8702A;
+    /* The one signal colour. Functional uses only — links, the one
+       primary button, focus rings, a handful of readout marks — never a
+       fill, a wash or a gradient. */
+    --accent:#4FD8E8;
+    --accent-dim:#2C7C87;
 
-    /* The redaction bar, translated. Dark on light, hatched, and it keeps
-       the length of what it covers — that property is the whole point. */
-    --redact:#2A3330;
+    --redact:#171B1F;
+    --redact-edge:#262C33;
 
-    --font-display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
-    --font-ui:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-ui:-apple-system,"Segoe UI Variable Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
     --font-mono:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,Menlo,monospace;
 
     --step--1:0.8125rem;
@@ -52,9 +53,9 @@
     --step-1:1.3125rem;
     --step-2:1.75rem;
     --step-3:2.375rem;
-    --step-4:clamp(2.5rem,6.2vw,3.75rem);
+    --step-4:clamp(2.375rem,5.6vw,3.5rem);
 
-    --measure:62ch;
+    --measure:60ch;
     --gutter:clamp(20px,5vw,40px);
   }
 
@@ -62,33 +63,35 @@
   html{-webkit-text-size-adjust:100%}
   body{
     margin:0;
-    background:var(--ground);
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 96px),
+      var(--ground);
     color:var(--ink-soft);
     font-family:var(--font-ui);
     font-size:var(--step-0);
-    line-height:1.62;
+    line-height:1.6;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
   }
 
-  /* Bands are full-width siblings at body level; .page is the inner measure.
-     Doing it the other way — one .page wrapper with bands inside it — means a
-     tinted band stops at the gutter and reads as an accidental panel, and the
-     usual fix (margin-inline: calc(50% - 50vw)) counts the scrollbar into
-     100vw and puts a horizontal scrollbar on the page. Structure is cheaper
-     than the workaround. */
+  /* Bands are full-width siblings at body level; .page is the inner measure. */
   .page{max-width:1060px;margin:0 auto;padding:0 var(--gutter)}
   .measure{max-width:var(--measure)}
 
-  h1,h2,h3{color:var(--ink);font-family:var(--font-display);font-weight:600;text-wrap:balance;margin:0}
-  h1{font-size:var(--step-4);line-height:1.05;letter-spacing:-0.015em}
-  h2{font-size:var(--step-3);line-height:1.15;letter-spacing:-0.01em}
-  h3{font-size:var(--step-1);line-height:1.25;font-family:var(--font-ui);font-weight:650;letter-spacing:-0.005em}
+  h1,h2,h3{color:var(--ink);font-family:var(--font-ui);font-weight:800;letter-spacing:-0.02em;text-wrap:balance;margin:0}
+  h1{font-size:var(--step-4);line-height:1.08}
+  h2{font-size:var(--step-3);line-height:1.15}
+  h3{font-size:1.0625rem;line-height:1.3;font-weight:700;letter-spacing:-0.005em}
   p{margin:0}
 
   .eyebrow{
-    display:block;font-family:var(--font-ui);font-size:var(--step--1);font-weight:650;
-    letter-spacing:0.13em;text-transform:uppercase;color:var(--ink-faint);
+    display:block;font-family:var(--font-mono);font-size:0.75rem;font-weight:600;
+    letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);
+  }
+  /* The running section count — a readout, not a page number. */
+  .band-index{
+    font-family:var(--font-mono);font-size:0.75rem;color:var(--ink-faint);
+    letter-spacing:0.04em;font-variant-numeric:tabular-nums;
   }
 
   a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
@@ -101,7 +104,7 @@
     padding:26px 0 0;
   }
   .wordmark{
-    font-family:var(--font-display);font-size:1.0625rem;font-weight:600;
+    font-family:var(--font-ui);font-size:1rem;font-weight:800;
     color:var(--ink);text-decoration:none;letter-spacing:-0.01em;
   }
   .wordmark:hover{color:var(--accent)}
@@ -109,138 +112,149 @@
   .masthead nav a{color:var(--ink-faint);text-decoration:none}
   .masthead nav a:hover{color:var(--ink)}
 
-  /* ---- hero -------------------------------------------------------- */
-  .hero{display:flex;gap:clamp(32px,6vw,72px);align-items:center;padding:clamp(56px,9vw,104px) 0 clamp(48px,7vw,84px)}
-  .hero-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:26px}
-  .hero-art{flex:0 0 auto;width:clamp(180px,24vw,244px)}
-  .hero-art svg{width:100%;height:auto;display:block}
-  .hero h1 .turn{display:block;color:var(--accent)}
-  .lede{font-size:var(--step-1);line-height:1.5;color:var(--ink-soft);max-width:52ch}
+  /* ---- a reusable instrument-panel frame ---------------------------- */
+  /* One bordered, sharp-cornered surface used everywhere something needs
+     to read as a readout rather than a card: the hero diagram, the
+     screenshots, the recipient's-eye record. Repetition is the point. */
+  .panel{
+    border:1px solid var(--rule-strong);border-radius:2px;background:var(--surface);
+  }
 
-  .actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  /* ---- hero -------------------------------------------------------- */
+  .hero{display:flex;flex-direction:column;gap:clamp(28px,5vw,44px);padding:clamp(48px,8vw,88px) 0 clamp(40px,6vw,64px)}
+  .hero-body{display:flex;flex-direction:column;gap:22px;max-width:56ch}
+  .hero h1 .turn{display:block;color:var(--accent)}
+  .lede{font-size:var(--step-1);line-height:1.5;color:var(--ink-soft)}
+
+  .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
   .btn{
-    display:inline-block;padding:13px 22px;border-radius:3px;
-    font-size:var(--step--1);font-weight:650;letter-spacing:0.01em;
+    display:inline-block;padding:12px 20px;border-radius:2px;
+    font-size:var(--step--1);font-weight:700;letter-spacing:0.01em;
     text-decoration:none;border:1px solid transparent;transition:background-color .15s ease,color .15s ease,border-color .15s ease;
   }
-  .btn-primary{background:var(--accent);color:#F7FAF8;border-color:var(--accent)}
-  .btn-primary:hover{background:#25564A;color:#F7FAF8}
+  .btn-primary{background:var(--accent);color:#06070A;border-color:var(--accent)}
+  .btn-primary:hover{background:#7CE6F0;border-color:#7CE6F0}
   .btn-quiet{background:transparent;color:var(--ink);border-color:var(--rule-strong)}
   .btn-quiet:hover{background:var(--surface);border-color:var(--ink-faint);color:var(--ink)}
-  .aside{font-size:var(--step--1);color:var(--ink-faint)}
+  .aside{font-size:var(--step--1);color:var(--ink-faint);font-family:var(--font-mono)}
+
+  .hero-art{padding:clamp(16px,3vw,28px);overflow-x:auto}
+  .hero-art svg{width:100%;height:auto;display:block;min-width:420px}
 
   /* ---- section rhythm ---------------------------------------------- */
-  .band{padding:clamp(56px,8vw,92px) 0;border-top:1px solid var(--rule)}
-  .band-head{display:flex;flex-direction:column;gap:14px;max-width:var(--measure)}
+  .band{padding:clamp(48px,7vw,80px) 0;border-top:1px solid var(--rule)}
+  .band-head{display:flex;flex-direction:column;gap:12px;max-width:var(--measure)}
+  .band-head-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
   .band-head p{color:var(--ink-soft)}
 
-  /* ---- three steps: a real sequence, so it is numbered -------------- */
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:clamp(28px,4vw,44px);margin-top:44px}
-  .step{display:flex;flex-direction:column;gap:10px}
-  .step-n{
-    font-family:var(--font-display);font-size:var(--step-2);line-height:1;color:var(--brass);
-    font-variant-numeric:tabular-nums;
-  }
-  .step-rule{height:1px;background:var(--rule-strong);margin:4px 0 2px}
-  .step p{font-size:var(--step--1);color:var(--ink-soft);line-height:1.6}
+  /* ---- how it works --------------------------------------------------- */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:clamp(24px,4vw,40px);margin-top:36px}
+  .step{display:flex;flex-direction:column;gap:8px}
+  .step-n{font-family:var(--font-mono);font-size:1.5rem;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+  .step-rule{height:1px;background:var(--rule-strong);margin:6px 0 4px}
+  .step p{font-size:var(--step--1);color:var(--ink-soft);line-height:1.55}
 
   /* ---- the differentiator ------------------------------------------ */
-  .share{background:var(--surface);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .share{background:var(--surface-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
   .share-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:start}
-  .share-copy{display:flex;flex-direction:column;gap:20px}
-  .share-points{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:14px}
-  .share-points li{position:relative;padding-left:26px;font-size:var(--step--1);color:var(--ink-soft)}
+  .share-copy{display:flex;flex-direction:column;gap:18px}
+  .share-points{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+  .share-points li{position:relative;padding-left:24px;font-size:var(--step--1);color:var(--ink-soft)}
   .share-points li::before{
-    content:"";position:absolute;left:0;top:9px;width:9px;height:9px;border-radius:1px;
+    content:"";position:absolute;left:0;top:8px;width:8px;height:8px;
     background:var(--accent);
   }
-  .share-points b{color:var(--ink);font-weight:650}
+  .share-points b{color:var(--ink);font-weight:700}
 
   /* The record a recipient sees. Real markup, not a screenshot: the bar
      keeps the length of the answer under it, which is the property the
      whole redaction idea rests on. */
-  .record{
-    background:var(--ground);border:1px solid var(--rule-strong);border-radius:4px;
-    padding:22px 24px 20px;display:flex;flex-direction:column;gap:0;
-  }
-  .record-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
-  .record-title{font-family:var(--font-display);font-size:1.0625rem;color:var(--ink);font-weight:600}
-  .record-meta{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint)}
-  .row{padding:13px 0;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:5px}
+  .record{padding:20px 22px 18px;display:flex;flex-direction:column;gap:0}
+  .record-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding-bottom:13px;border-bottom:1px solid var(--rule)}
+  .record-title{font-family:var(--font-ui);font-size:1rem;color:var(--ink);font-weight:700}
+  .record-meta{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint)}
+  .row{padding:12px 0;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:5px}
   .row:last-of-type{border-bottom:0;padding-bottom:2px}
-  .row-cap{font-size:12.5px;color:var(--ink-faint);display:flex;align-items:center;gap:8px}
+  .row-cap{font-size:12px;color:var(--ink-faint);display:flex;align-items:center;gap:8px}
   .row-val{font-family:var(--font-mono);font-size:13px;color:var(--ink);word-break:break-word}
   .chip{
-    font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;font-weight:650;
-    color:var(--brass);border:1px solid #E0CBAC;border-radius:999px;padding:2px 7px;
+    font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;
+    color:var(--accent);border:1px solid var(--accent-dim);border-radius:2px;padding:2px 6px;
+    font-family:var(--font-mono);
   }
   .redact{
     display:inline-block;position:relative;background:var(--redact);color:transparent;
-    border-radius:2px;padding:1px 4px;user-select:none;
+    border:1px solid var(--redact-edge);border-radius:2px;padding:1px 4px;user-select:none;
   }
   .redact::after{
     content:"";position:absolute;inset:0;border-radius:2px;
-    background:repeating-linear-gradient(-45deg,transparent 0 5px,rgba(247,245,241,.16) 5px 10px);
+    background:repeating-linear-gradient(-45deg,transparent 0 5px,rgba(255,255,255,.05) 5px 10px);
   }
-  .record-foot{margin-top:16px;font-size:12px;color:var(--ink-faint);line-height:1.55}
+  .record-foot{margin-top:15px;font-size:12px;color:var(--ink-faint);line-height:1.5}
 
   @media (max-width:820px){
     .share-grid{grid-template-columns:1fr}
   }
-  /* The hero is the one block that cannot rely on auto-fit: it is a flex row,
-     so without this the headline keeps shrinking beside the drawing instead of
-     moving under it, and sets three words to a line on a phone. */
-  @media (max-width:760px){
-    .hero{flex-direction:column-reverse;align-items:flex-start;gap:30px}
-    .hero-art{width:min(168px,42vw)}
-    .masthead{flex-wrap:wrap;gap:10px 24px}
+
+  /* ---- scenarios: continuity across an interruption ------------------ */
+  .continuity{margin-top:8px;padding:10px 0}
+  .continuity svg{width:100%;height:auto;display:block;max-width:520px}
+  .scenarios{
+    display:flex;flex-direction:column;margin-top:8px;
+    max-width:var(--measure);
   }
+  .scenario-n{font-family:var(--font-mono);font-size:0.8125rem;color:var(--accent);padding-top:2px;flex:0 0 auto}
+  .scenario-line{padding:11px 0;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+  .scenario-line:first-of-type{border-top:none}
+  .scenario-label{color:var(--ink);font-weight:700;font-size:var(--step--1);flex:0 0 200px}
+  .scenario-detail{color:var(--ink-faint);font-size:var(--step--1)}
 
-  /* ---- scenarios ---------------------------------------------------- */
-  .scenarios{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:clamp(24px,3.5vw,40px);margin-top:44px}
-  .scenario{display:flex;flex-direction:column;gap:10px;padding-left:20px;border-left:2px solid var(--accent-wash)}
-  .scenario h3{font-size:1.0625rem}
-  .scenario p{font-size:var(--step--1);color:var(--ink-soft)}
-
-  /* ---- privacy ------------------------------------------------------ */
-  .claims{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:clamp(24px,3.5vw,40px)}
-  .claim{display:flex;flex-direction:column;gap:8px}
-  .claim h3{font-size:1rem}
-  .claim p{font-size:var(--step--1);color:var(--ink-soft)}
-  .claim .mark{width:22px;height:2px;background:var(--accent);border-radius:1px}
-
-  .panel{
-    margin-top:44px;padding:24px 26px;background:var(--sunk);
-    border:1px solid var(--rule);border-radius:4px;max-width:var(--measure);
-    display:flex;flex-direction:column;gap:14px;
+  /* ---- privacy: a spec sheet, not prose ------------------------------ */
+  .spec{margin-top:32px;overflow-x:auto}
+  .spec-row{
+    display:grid;grid-template-columns:200px 1fr;gap:8px 20px;
+    padding:12px 0;border-top:1px solid var(--rule);align-items:baseline;
   }
-  .panel h3{font-size:1rem}
-  .panel p{font-size:var(--step--1);color:var(--ink-soft)}
-  code{font-family:var(--font-mono);font-size:0.92em;color:var(--brass)}
+  .spec-row:first-child{border-top:1px solid var(--rule-strong)}
+  .spec-row:last-child{border-bottom:1px solid var(--rule-strong)}
+  .spec-key{font-family:var(--font-mono);font-size:0.8125rem;color:var(--ink-faint);letter-spacing:0.04em;white-space:nowrap}
+  .spec-val{color:var(--ink);font-size:var(--step--1)}
 
-  /* ---- screenshots -------------------------------------------------- */
+  .panel-note{
+    margin-top:28px;padding:18px 20px;max-width:var(--measure);
+    display:flex;flex-direction:column;gap:10px;
+    border-left:2px solid var(--accent-dim);
+  }
+  .panel-note p{font-size:var(--step--1);color:var(--ink-soft)}
+  code{font-family:var(--font-mono);font-size:0.92em;color:var(--accent)}
+
+  /* ---- screenshots ---------------------------------------------------- */
   /* Real captures of the extension, taken by scripts/screenshots.js against
-     the packaged build — not staged, not touched up. Each frame is sized to
-     its own image rather than a shared aspect-ratio box: the popup is
-     genuinely a narrow, tall panel, and forcing it into a landscape crop
-     would either hide most of it or float it in a sea of padding. */
-  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:clamp(20px,3vw,32px);margin-top:44px;align-items:start}
-  figure{margin:0;display:flex;flex-direction:column;gap:12px}
-  .shot-frame{
-    border:1px solid var(--rule-strong);border-radius:6px;background:var(--surface);
-    padding:12px;display:flex;justify-content:center;
+     the packaged build — not staged, not touched up. Framed as evidence:
+     each one gets the same hairline panel as everything else on this page,
+     with a mono caption underneath like a figure in a spec sheet. */
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:clamp(20px,3vw,32px);margin-top:36px;align-items:start}
+  figure{margin:0;display:flex;flex-direction:column;gap:0}
+  .shot-frame{padding:12px;display:flex;justify-content:center}
+  .shot-frame img{width:100%;height:auto;display:block;border-radius:1px}
+  figcaption{
+    padding:10px 12px;border-top:1px solid var(--rule-strong);
+    font-family:var(--font-mono);font-size:0.75rem;color:var(--ink-faint);line-height:1.5;
   }
-  .shot-frame img{width:100%;height:auto;display:block;border-radius:3px}
-  figcaption{font-size:var(--step--1);color:var(--ink-soft)}
 
   /* ---- close -------------------------------------------------------- */
-  .close{display:flex;flex-direction:column;gap:22px;align-items:flex-start}
-  footer{border-top:1px solid var(--rule);padding:34px 0 64px}
-  .foot-inner{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:baseline;justify-content:space-between}
-  footer .note{font-size:var(--step--1);color:var(--ink-faint);max-width:46ch;margin:0}
-  footer nav{display:flex;gap:22px;font-size:var(--step--1)}
+  .close{display:flex;flex-direction:column;gap:20px;align-items:flex-start}
+  footer{border-top:1px solid var(--rule);padding:30px 0 60px}
+  .foot-inner{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:baseline;justify-content:space-between}
+  footer .note{font-size:var(--step--1);color:var(--ink-faint);max-width:46ch;margin:0;font-family:var(--font-mono)}
+  footer nav{display:flex;gap:20px;font-size:var(--step--1)}
   footer nav a{color:var(--ink-faint);text-decoration:none}
   footer nav a:hover{color:var(--ink)}
+
+  @media (max-width:620px){
+    .spec-row{grid-template-columns:1fr}
+    .masthead{flex-wrap:wrap;gap:10px 24px}
+  }
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -262,74 +276,82 @@
 <header>
   <div class="page hero">
     <div class="hero-body">
-      <h1>The session timed out.<span class="turn">Your answers didn&rsquo;t.</span></h1>
-      <p class="lede">Visa applications, mortgages, benefits claims, job
-      applications &mdash; the forms long enough to need a break, and
-      unforgiving enough to lose everything when you take one. Form For Later
-      keeps what you have already typed, on your own device, and puts it back
-      in one click.</p>
+      <h1>Session timed out.<span class="turn">Answers didn&rsquo;t.</span></h1>
+      <p class="lede">Long forms lose progress. This one keeps it, on your
+      device, until you put it back.</p>
       <div class="actions">
         <!-- TODO: Chrome Web Store URL, once the listing is live. -->
         <a class="btn btn-primary" href="#install">Add to Chrome</a>
-        <a class="btn btn-quiet" href="#privacy">What it does with your data</a>
+        <a class="btn btn-quiet" href="#privacy">Data handling</a>
       </div>
-      <p class="aside">Free &middot; no account &middot; nothing leaves your
-      device unless you send it deliberately</p>
+      <p class="aside">FREE &middot; NO ACCOUNT &middot; NOTHING LEAVES WITHOUT YOU</p>
     </div>
 
-    <!-- A sheet part-filled by hand: two answers in, one mid-stroke, one
-         held back behind a redaction bar, two still blank. The wobble is
-         drawn in — a ruled illustration would read as a system diagram
-         rather than a form somebody is partway through. -->
-    <div class="hero-art" aria-hidden="true">
-      <svg viewBox="0 0 200 262" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
+    <!-- The idea in one diagram: a form saved mid-fill, the same partial
+         state returned later, then handed onward with two fields redacted.
+         Exact rects and hairlines rather than the hand-drawn wobble this
+         used to be — precision is the whole point now. -->
+    <div class="hero-art panel" aria-hidden="true">
+      <svg viewBox="0 0 500 210" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
         <defs>
-          <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
-            <rect width="10" height="10" fill="#2A3330"/>
-            <rect width="5" height="10" fill="#3A4643"/>
+          <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+            <rect width="8" height="8" fill="#171B1F"/>
+            <rect width="4" height="8" fill="#20262C"/>
           </pattern>
         </defs>
 
-        <!-- the page underneath, just showing at the edge -->
-        <path d="M31 20 C29 16, 34 14, 39 14 L178 18 C183 18, 185 22, 184 27
-                 L188 232 C188 238, 184 242, 178 241"
-              stroke="#E4DFD6" stroke-width="2" stroke-linecap="round" fill="#FBFAF7"/>
+        <!-- panel 1: SAVED -->
+        <rect x="10" y="16" width="120" height="136" fill="#0D1013"/>
+        <path d="M10 26 V16 H20 M120 16 H130 V26 M130 142 V152 H120 M20 152 H10 V142" stroke="#262C33" stroke-width="1.5"/>
+        <rect x="22" y="30" width="28" height="3" fill="#262C33"/>
+        <rect x="22" y="39" width="82" height="8" fill="#7A828B"/>
+        <rect x="22" y="62" width="28" height="3" fill="#262C33"/>
+        <rect x="22" y="71" width="64" height="8" fill="#7A828B"/>
+        <rect x="22" y="94" width="28" height="3" fill="#262C33"/>
+        <rect x="22" y="103" width="34" height="8" fill="#7A828B"/>
+        <rect x="59" y="103" width="2" height="8" fill="#4FD8E8"/>
+        <rect x="22" y="126" width="28" height="3" fill="#262C33"/>
+        <line x1="22" y1="130" x2="72" y2="130" stroke="#262C33" stroke-width="1.2" stroke-dasharray="2 3"/>
 
-        <!-- the sheet being filled in -->
-        <path d="M15 27 C13 23, 18 21, 23 21 L162 25 C167 25, 169 29, 168 34
-                 L173 240 C173 246, 169 250, 163 249 L22 254 C16 254, 13 250, 14 245 Z"
-              fill="#FBFAF7" stroke="#CFC8BC" stroke-width="2.1" stroke-linejoin="round"/>
-        <path d="M173 240 L150 251 L163 249 Z" fill="#EFEDE6" stroke="#CFC8BC" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- panel 2: RESTORED — identical data, no cursor: it just came back -->
+        <rect x="170" y="16" width="120" height="136" fill="#0D1013"/>
+        <path d="M170 26 V16 H180 M280 16 H290 V26 M290 142 V152 H280 M180 152 H170 V142" stroke="#262C33" stroke-width="1.5"/>
+        <rect x="182" y="30" width="28" height="3" fill="#262C33"/>
+        <rect x="182" y="39" width="82" height="8" fill="#7A828B"/>
+        <rect x="182" y="62" width="28" height="3" fill="#262C33"/>
+        <rect x="182" y="71" width="64" height="8" fill="#7A828B"/>
+        <rect x="182" y="94" width="28" height="3" fill="#262C33"/>
+        <rect x="182" y="103" width="34" height="8" fill="#7A828B"/>
+        <rect x="182" y="126" width="28" height="3" fill="#262C33"/>
+        <line x1="182" y1="130" x2="232" y2="130" stroke="#262C33" stroke-width="1.2" stroke-dasharray="2 3"/>
 
-        <!-- heading -->
-        <path d="M29 50 C57 48, 88 49, 113 47" stroke="#A8702A" stroke-width="3.6" stroke-linecap="round"/>
-        <path d="M29 60 C47 59, 62 60, 74 59" stroke="#CFC8BC" stroke-width="2" stroke-linecap="round"/>
+        <!-- panel 3: SHARED — finished, two fields held back, sent onward -->
+        <rect x="330" y="16" width="120" height="136" fill="#0D1013"/>
+        <path d="M330 26 V16 H340 M440 16 H450 V26 M450 142 V152 H440 M340 152 H330 V142" stroke="#262C33" stroke-width="1.5"/>
+        <rect x="342" y="30" width="28" height="3" fill="#262C33"/>
+        <rect x="342" y="39" width="82" height="8" fill="#7A828B"/>
+        <rect x="342" y="62" width="28" height="3" fill="#262C33"/>
+        <rect x="342" y="71" width="64" height="8" fill="url(#hatch)" stroke="#262C33" stroke-width="1"/>
+        <rect x="342" y="94" width="28" height="3" fill="#262C33"/>
+        <rect x="342" y="103" width="58" height="8" fill="url(#hatch)" stroke="#262C33" stroke-width="1"/>
+        <rect x="342" y="126" width="28" height="3" fill="#262C33"/>
+        <rect x="342" y="130" width="72" height="8" fill="#7A828B"/>
 
-        <!-- answered -->
-        <path d="M28 84 C45 83, 57 84, 67 83" stroke="#B9C0BC" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M28 94 C59 92, 96 94, 148 92" stroke="#E4DFD6" stroke-width="1.6"/>
-        <path d="M32 89 C41 86, 49 91, 59 87 C67 84, 74 90, 84 87" stroke="#2F6B5B" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M154 84 L158 89 L166 78" stroke="#2F6B5B" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- flow: panel to panel -->
+        <line x1="134" y1="84" x2="164" y2="84" stroke="#5B6570" stroke-width="1.4"/>
+        <path d="M164 84 L157 79 L157 89 Z" fill="#5B6570"/>
+        <line x1="294" y1="84" x2="324" y2="84" stroke="#5B6570" stroke-width="1.4"/>
+        <path d="M324 84 L317 79 L317 89 Z" fill="#5B6570"/>
 
-        <!-- answered -->
-        <path d="M28 116 C42 115, 52 116, 61 115" stroke="#B9C0BC" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M28 126 C59 124, 96 126, 148 124" stroke="#E4DFD6" stroke-width="1.6"/>
-        <path d="M32 121 C44 118, 55 123, 67 119 C78 116, 91 122, 104 118" stroke="#2F6B5B" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M154 116 L158 121 L166 110" stroke="#2F6B5B" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- handed onward -->
+        <line x1="454" y1="84" x2="480" y2="84" stroke="#4FD8E8" stroke-width="1.5"/>
+        <circle cx="489" cy="84" r="7" fill="none" stroke="#4FD8E8" stroke-width="1.5"/>
+        <circle cx="489" cy="84" r="2" fill="#4FD8E8"/>
 
-        <!-- held back: the redaction bar, in the drawing as on the page -->
-        <path d="M28 148 C44 147, 55 148, 65 147" stroke="#B9C0BC" stroke-width="1.8" stroke-linecap="round"/>
-        <rect x="28" y="152" width="86" height="11" rx="2" fill="url(#hatch)"/>
-        <path d="M28 168 C59 166, 96 168, 148 166" stroke="#E4DFD6" stroke-width="1.6"/>
-
-        <!-- the pen stops here -->
-        <path d="M28 190 C44 189, 55 190, 66 189" stroke="#B9C0BC" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M28 200 C59 198, 96 200, 148 198" stroke="#E4DFD6" stroke-width="1.6"/>
-        <path d="M32 195 C40 192, 47 197, 55 194" stroke="#2F6B5B" stroke-width="2.4" stroke-linecap="round"/>
-
-        <!-- not yet -->
-        <path d="M28 222 C41 221, 50 222, 59 221" stroke="#B9C0BC" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M28 232 C59 230, 96 232, 148 230" stroke="#E4DFD6" stroke-width="1.6"/>
+        <!-- readout labels -->
+        <text x="70" y="176" text-anchor="middle" font-family="Cascadia Mono, Consolas, monospace" font-size="10" letter-spacing="1.4" fill="#737D87">SAVED</text>
+        <text x="230" y="176" text-anchor="middle" font-family="Cascadia Mono, Consolas, monospace" font-size="10" letter-spacing="1.4" fill="#737D87">RESTORED</text>
+        <text x="390" y="176" text-anchor="middle" font-family="Cascadia Mono, Consolas, monospace" font-size="10" letter-spacing="1.4" fill="#737D87">SHARED</text>
       </svg>
     </div>
   </div>
@@ -339,34 +361,32 @@
 <section class="band" id="how">
   <div class="page">
     <div class="band-head">
-      <span class="eyebrow">How it works</span>
-      <h2>Three steps, and the middle one is leaving.</h2>
+      <div class="band-head-row">
+        <span class="eyebrow">How it works</span>
+        <span class="band-index">01 / 06</span>
+      </div>
+      <h2>Save. Wait. Restore.</h2>
     </div>
 
     <div class="steps">
       <div class="step">
         <span class="step-n">01</span>
         <div class="step-rule"></div>
-        <h3>Save what is on screen</h3>
-        <p>Click the toolbar icon, or press the shortcut. It reads the answers
-        already filled in and works out what each one is called from the label
-        you can see &mdash; not from whatever the site named the field.</p>
+        <h3>Save what&rsquo;s on screen</h3>
+        <p>One click. Matched by the label you can see, not the field&rsquo;s
+        internal name.</p>
       </div>
       <div class="step">
         <span class="step-n">02</span>
         <div class="step-rule"></div>
-        <h3>Close the tab. Sleep on it.</h3>
-        <p>Everything is written to this device and nowhere else. Take an hour
-        or take a fortnight; a timed-out session stops being the thing that
-        decides when you finish.</p>
+        <h3>Leave. Come back whenever.</h3>
+        <p>Nothing leaves this device while you&rsquo;re away.</p>
       </div>
       <div class="step">
         <span class="step-n">03</span>
         <div class="step-rule"></div>
-        <h3>Put it back in one click</h3>
-        <p>Open the form again and restore. It tells you how many answers
-        landed and how many it matched by their label rather than exactly,
-        because those are the ones worth a second look.</p>
+        <h3>Restore in one click</h3>
+        <p>Refills every saved answer, and flags the ones it had to guess.</p>
       </div>
     </div>
   </div>
@@ -377,34 +397,30 @@
   <div class="page">
     <div class="share-grid">
       <div class="share-copy">
-        <span class="eyebrow">The part nothing else does</span>
-        <h2>Hand someone an unfinished form without handing over all of it.</h2>
-        <p>Half of finishing a hard form is somebody else &mdash; an
-        accountant, a caseworker, a relative who has done this before. The
-        usual options are emailing your answers around or reading them down a
-        phone line.</p>
-        <p>Instead, send a link. It is encrypted in your browser before it
-        exists, it stops working on a date you choose, and you decide field by
-        field what travels. Anything you hold back is removed <em>before</em>
-        encryption &mdash; not hidden behind a button on the other end.</p>
+        <div class="band-head-row">
+          <span class="eyebrow">The part nothing else does</span>
+          <span class="band-index">02 / 06</span>
+        </div>
+        <h2>Hand off part of a form, not all of it.</h2>
+        <p>Send a link instead of forwarding everything. It&rsquo;s encrypted
+        before it leaves your browser, and you choose what travels, field by
+        field.</p>
 
         <ul class="share-points">
-          <li><b>Encrypted where you are.</b> AES-256-GCM, with a key that
-          lives in the link and never reaches any server.</li>
-          <li><b>It expires.</b> One hour, a day, or a week &mdash; and
-          optionally deletes itself the first time it is opened.</li>
-          <li><b>They need nothing.</b> No account, no install. A link and a
-          browser.</li>
-          <li><b>Passwords cannot be in it.</b> They were never saved in the
-          first place, so there is nothing to leak.</li>
+          <li><b>Encrypted here.</b> AES-256-GCM. The key never leaves the
+          link.</li>
+          <li><b>Expires on schedule.</b> An hour, a day, a week &mdash; and
+          can delete itself on first open.</li>
+          <li><b>No account needed.</b> A link and a browser. Nothing to
+          install.</li>
+          <li><b>Held back, not hidden.</b> Removed before encryption &mdash;
+          never present to leak.</li>
         </ul>
       </div>
 
       <!-- What the recipient actually sees. The bars keep the length of the
-           answers beneath them, so a record stays auditable in public: you
-           can tell a withheld postcode from a withheld passport number
-           without either being on screen. -->
-      <div class="record">
+           answers beneath them, so a record stays auditable in public. -->
+      <div class="record panel">
         <div class="record-head">
           <span class="record-title">Skilled Worker visa</span>
           <span class="record-meta">expires in 23h</span>
@@ -431,8 +447,8 @@
           <span class="row-val">Job offer, start date 4 March</span>
         </div>
 
-        <p class="record-foot">Two answers were held back. Their shape is still
-        visible, so you can see what is missing without seeing what it says.</p>
+        <p class="record-foot">Two answers held back. Their shape stays
+        visible; their content doesn&rsquo;t.</p>
       </div>
     </div>
   </div>
@@ -442,28 +458,59 @@
 <section class="band">
   <div class="page">
     <div class="band-head">
-      <span class="eyebrow">When it earns its place</span>
+      <div class="band-head-row">
+        <span class="eyebrow">Where it fits</span>
+        <span class="band-index">03 / 06</span>
+      </div>
       <h2>Three ordinary afternoons.</h2>
     </div>
 
+    <!-- A signal that keeps going after a dropout: the line stops, two
+         break marks note the gap, and it resumes at the exact same height —
+         nothing lost, nothing shifted. That is the one idea behind every
+         scenario below, so it is drawn once rather than three times. -->
+    <div class="continuity" aria-hidden="true">
+      <svg viewBox="0 0 460 56" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
+        <line x1="10" y1="30" x2="185" y2="30" stroke="#262C33" stroke-width="1.5"/>
+        <line x1="217" y1="30" x2="450" y2="30" stroke="#262C33" stroke-width="1.5"/>
+        <g stroke="#5B6570" stroke-width="1.5">
+          <line x1="10" y1="27" x2="10" y2="33"/>
+          <line x1="50" y1="27" x2="50" y2="33"/>
+          <line x1="90" y1="27" x2="90" y2="33"/>
+          <line x1="130" y1="27" x2="130" y2="33"/>
+          <line x1="170" y1="27" x2="170" y2="33"/>
+          <line x1="250" y1="27" x2="250" y2="33"/>
+          <line x1="290" y1="27" x2="290" y2="33"/>
+          <line x1="330" y1="27" x2="330" y2="33"/>
+          <line x1="370" y1="27" x2="370" y2="33"/>
+          <line x1="410" y1="27" x2="410" y2="33"/>
+          <line x1="450" y1="27" x2="450" y2="33"/>
+        </g>
+        <g stroke="#737D87" stroke-width="1.6" stroke-linecap="round">
+          <line x1="193" y1="22" x2="199" y2="38"/>
+          <line x1="203" y1="22" x2="209" y2="38"/>
+        </g>
+        <circle cx="185" cy="30" r="3" fill="#2C7C87"/>
+        <circle cx="217" cy="30" r="3.5" fill="#4FD8E8"/>
+        <circle cx="217" cy="30" r="7" fill="none" stroke="#4FD8E8" stroke-width="1" opacity="0.5"/>
+      </svg>
+    </div>
+
     <div class="scenarios">
-      <div class="scenario">
-        <h3>The twelfth job application</h3>
-        <p>The same eight answers, retyped into a different applicant tracking
-        system, with three custom questions bolted on the end. Save one, and
-        the next one starts most of the way finished.</p>
+      <div class="scenario-line">
+        <span class="scenario-n">01</span>
+        <span class="scenario-label">The twelfth application</span>
+        <span class="scenario-detail">Same eight answers. New tracking system.</span>
       </div>
-      <div class="scenario">
-        <h3>A form on behalf of a parent</h3>
-        <p>You fill in what you know, send them the rest to check, and hold
-        back the bits that are not yours to forward. They read it in a browser,
-        with no account to create.</p>
+      <div class="scenario-line">
+        <span class="scenario-n">02</span>
+        <span class="scenario-label">On someone&rsquo;s behalf</span>
+        <span class="scenario-detail">You fill in what you know. They check the rest.</span>
       </div>
-      <div class="scenario">
-        <h3>An application across two evenings</h3>
-        <p>Forty minutes on Tuesday, the rest on Thursday. The portal logs you
-        out somewhere in between, as portals do, and it costs you a click
-        rather than the forty minutes.</p>
+      <div class="scenario-line">
+        <span class="scenario-n">03</span>
+        <span class="scenario-label">Split across two evenings</span>
+        <span class="scenario-detail">Portal logs you out. Restoring costs one click.</span>
       </div>
     </div>
   </div>
@@ -473,66 +520,48 @@
 <section class="band" id="privacy">
   <div class="page">
     <div class="band-head">
-      <span class="eyebrow">Privacy</span>
-      <h2>Worth reading before you install anything that can see what you type.</h2>
-      <p>The claims below are the ones the product is actually built on, and
-      the privacy policy names the file and function behind each of them so you
-      can check rather than trust.</p>
+      <div class="band-head-row">
+        <span class="eyebrow">Privacy</span>
+        <span class="band-index">04 / 06</span>
+      </div>
+      <h2>Verify, don&rsquo;t trust.</h2>
+      <p>Every fact below is cited to a file and a function in the <a
+      href="/privacy">full policy</a> &mdash; checkable, not just claimed.</p>
     </div>
 
-    <ul class="claims">
-      <li class="claim">
-        <span class="mark"></span>
-        <h3>Nothing leaves the device</h3>
-        <p>Your answers are written to your browser&rsquo;s own storage on this
-        machine. There is no copy on a server of ours, because there is no
-        server of ours.</p>
-      </li>
-      <li class="claim">
-        <span class="mark"></span>
-        <h3>No account, ever</h3>
-        <p>No sign-in, no email address, no profile. The only identifier is a
-        random value generated on this device that is never sent anywhere.</p>
-      </li>
-      <li class="claim">
-        <span class="mark"></span>
-        <h3>Passwords are never saved</h3>
-        <p>Passwords, one-time codes and card security codes are discarded
-        while the page is being read, before anything is written. Not masked,
-        not encrypted &mdash; never stored.</p>
-      </li>
-      <li class="claim">
-        <span class="mark"></span>
-        <h3>One network request exists</h3>
-        <p>In the entire codebase, and only if you deploy the optional relay
-        yourself. The build refuses to produce a package where that count is
-        anything else.</p>
-      </li>
-      <li class="claim">
-        <span class="mark"></span>
-        <h3>No analytics of any kind</h3>
-        <p>No telemetry, no crash reporting, no tracking. Not in the extension,
-        and not on this page &mdash; it loads no script and no external file.</p>
-      </li>
-      <li class="claim">
-        <span class="mark"></span>
-        <h3>No remote code</h3>
-        <p>Every script the extension runs ships inside the package. Nothing is
-        fetched and executed later.</p>
-      </li>
-    </ul>
+    <div class="spec">
+      <div class="spec-row">
+        <span class="spec-key">STORAGE</span>
+        <span class="spec-val">chrome.storage.local &mdash; this device only</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">ACCOUNT</span>
+        <span class="spec-val">none</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">PASSWORDS</span>
+        <span class="spec-val">discarded before write &mdash; never stored</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">NETWORK CALLS</span>
+        <span class="spec-val">one, and only if you deploy the optional relay yourself</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">ANALYTICS</span>
+        <span class="spec-val">none &mdash; not in the extension, not on this page</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">REMOTE CODE</span>
+        <span class="spec-val">none &mdash; every script ships inside the package</span>
+      </div>
+    </div>
 
-    <div class="panel">
+    <div class="panel-note">
       <h3>The one thing we do host</h3>
-      <p>A share link needs a page for your recipient to open, and one is
-      filled in by default so sharing works without you deploying anything. It
-      is a static file. Both the encrypted answers and the key that opens them
-      travel in the part of the link after the <code>#</code>, which browsers
-      never send to a server &mdash; so that host receives a request for an
-      HTML file and learns nothing about what is in the link. The extension
-      itself never contacts it; only your recipient&rsquo;s browser does.</p>
-      <p>You can point the setting at your own copy instead, or clear it and
-      not share at all.</p>
+      <p>A static page a recipient opens to read a share link. It cannot read
+      the link either &mdash; the answers and the key travel in the part
+      browsers never send to a server. Point it at your own copy, or clear it
+      and don&rsquo;t share at all.</p>
     </div>
   </div>
 </section>
@@ -541,37 +570,37 @@
 <section class="band">
   <div class="page">
     <div class="band-head">
-      <span class="eyebrow">A look at it</span>
-      <h2>Screenshots.</h2>
+      <div class="band-head-row">
+        <span class="eyebrow">Evidence</span>
+        <span class="band-index">05 / 06</span>
+      </div>
+      <h2>Not a mockup.</h2>
     </div>
 
     <!-- Local files, generated by scripts/screenshots.js from the packaged
          extension. This page loads no external asset and should stay that
-         way — see the "No remote code" claim below, which this is part of. -->
+         way — see NETWORK CALLS above, which this is part of. -->
     <div class="shots">
       <figure>
-        <div class="shot-frame">
+        <div class="shot-frame panel">
           <img src="shots/popup.png" width="696" height="866" loading="lazy"
                alt="The Form For Later popup open over a partly filled job application. It reads &ldquo;4 filled answers found&rdquo; above a Save button, with a Restore option below it.">
         </div>
-        <figcaption>The popup: how many answers it found on this page, and one
-        button to keep them.</figcaption>
+        <figcaption>THE POPUP &mdash; a real count, one button.</figcaption>
       </figure>
       <figure>
-        <div class="shot-frame">
+        <div class="shot-frame panel">
           <img src="shots/viewer.png" width="2360" height="1800" loading="lazy"
                alt="The Form For Later record viewer showing a two-page &ldquo;Riverside Labs — Software Engineer&rdquo; application. Full name, email, mobile number, date of birth and home address are each hidden behind a hatched redaction bar with its own Hide and Share switch.">
         </div>
-        <figcaption>The record: every step of the form, every answer under the
-        caption it had on screen.</figcaption>
+        <figcaption>THE RECORD &mdash; every field, redacted where it should be.</figcaption>
       </figure>
       <figure>
-        <div class="shot-frame">
+        <div class="shot-frame panel">
           <img src="shots/share.png" width="2360" height="1800" loading="lazy"
                alt="The Create a share link dialog, with the record's second page unticked. The tally reads &ldquo;4 answers included, 1 held back, 1 of 2 pages.&rdquo;">
         </div>
-        <figcaption>Building a link, where the count you read is the count you
-        send.</figcaption>
+        <figcaption>THE SHARE SHEET &mdash; the count you read is the count you send.</figcaption>
       </figure>
     </div>
   </div>
@@ -581,25 +610,25 @@
 <section class="band" id="install">
   <div class="page">
     <div class="close">
-      <span class="eyebrow">Getting it</span>
+      <div class="band-head-row" style="width:100%">
+        <span class="eyebrow">Getting it</span>
+        <span class="band-index">06 / 06</span>
+      </div>
       <h2>Not published yet.</h2>
-      <p class="measure">Form For Later is finished enough to use and is going
-      through Chrome Web Store review. This button will point at the listing
-      the day it is live.</p>
+      <p class="measure">In Chrome Web Store review &mdash; this button will
+      point at the listing the day it&rsquo;s live.</p>
       <div class="actions">
         <!-- TODO: Chrome Web Store URL. -->
         <a class="btn btn-primary" href="#install">Add to Chrome</a>
       </div>
-      <p class="aside">Chrome 116 or newer. A Firefox build is possible and not
-      done yet.</p>
+      <p class="aside">CHROME 116+ &middot; FIREFOX: POSSIBLE, NOT BUILT</p>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="page foot-inner">
-    <p class="note">Form For Later &mdash; long forms, kept on the device you
-    filled them in on. Published from source; never edited in place.</p>
+    <p class="note">FORM FOR LATER &mdash; KEPT ON THE DEVICE YOU FILLED IT IN ON.</p>
     <nav>
       <!-- TODO: point "Source" at the repository once it is public. -->
       <a href="/privacy">Privacy policy</a>
