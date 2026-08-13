@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Form For Later — privacy policy</title>
 <meta name="description" content="What FormForLater saves, what it never saves, what happens when you share, and what leaves your device — in plain English, with the code behind every claim one click away.">
 <style>
@@ -53,9 +53,13 @@
   }
 
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
+  /* Belt and suspenders against horizontal overflow on the page itself —
+     see server/site/index.html for the full reasoning. The table below is
+     the one element here with a genuine fixed min-width, and it already
+     scrolls inside its own wrapper rather than the page. */
+  html{-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%}
   body{
-    margin:0;
+    margin:0;overflow-x:hidden;width:100%;
     background:
       radial-gradient(600px circle at 85% 4%, rgba(79,140,255,0.18), transparent 60%),
       radial-gradient(600px circle at 8% 40%, rgba(178,108,255,0.13), transparent 60%),
@@ -65,7 +69,10 @@
     font-family:var(--font-ui);font-size:1.0625rem;line-height:1.65;
     -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   }
-  .page{max-width:1000px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+  .page{
+    max-width:1000px;margin:0 auto;
+    padding:0 max(clamp(20px,5vw,40px), env(safe-area-inset-right)) 0 max(clamp(20px,5vw,40px), env(safe-area-inset-left));
+  }
   .doc{max-width:66ch}
 
   h1,h2,h3{color:var(--ink);font-family:var(--font-ui);font-weight:800;letter-spacing:-0.015em;text-wrap:balance}
@@ -178,7 +185,7 @@
 
   footer{
     margin-top:clamp(52px,8vw,80px);border-top:1px solid var(--rule);
-    padding:28px 0 68px;font-size:0.8125rem;color:var(--ink-faint);font-family:var(--font-mono);
+    padding:28px 0 max(68px, calc(24px + env(safe-area-inset-bottom)));font-size:0.8125rem;color:var(--ink-faint);font-family:var(--font-mono);
     display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-between;align-items:baseline;
   }
   footer a{color:var(--ink-faint);text-decoration:none}

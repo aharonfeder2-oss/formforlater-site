@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Try FormForLater</title>
+<meta name="description" content="A working demo of FormForLater, right in your browser. Fill in a two-page form, save it, watch it vanish, then bring it back — no install needed. Nothing you type here is stored anywhere.">
+<style>
+  /* ------------------------------------------------------------------
+     formforlater.com/demo — a working demo, no install needed.
+
+     Same glass-and-neon system as the rest of the site. This is also the
+     first page on the site that runs any JavaScript at all — every other
+     published page is still plain HTML and CSS. The script at the bottom
+     of this file is the whole of it: inline, nothing fetched from
+     anywhere else, and it keeps its state in one JS object in memory.
+     Nothing typed here touches localStorage, sessionStorage, a cookie or
+     any network request — reload the page and it's gone, same as it
+     would be if you'd never opened it.
+
+     The mock popup on this page is styled to look like the real one on
+     purpose — that's the point of a demo — but it is not the real
+     extension, doesn't run in a real browser toolbar, and can't touch a
+     real webpage. Said plainly in the copy in three places, not just
+     once, because this is the one page on the site where the whole
+     point is to look like the product.
+     ------------------------------------------------------------------ */
+
+  :root{
+    --ground:#0A0A14;
+    --surface:#12131F;
+    --surface-2:#171829;
+    --sunk:#06060C;
+    --ink:#F3F5FF;
+    --ink-soft:#B9C0DC;
+    --ink-faint:#9AA3C4;
+    --rule:rgba(255,255,255,0.09);
+    --rule-strong:rgba(255,255,255,0.18);
+
+    --neon-blue:#4F8CFF;
+    --neon-blue-soft:#8FB4FF;
+    --neon-violet:#B26CFF;
+    --neon-violet-soft:#C98CFF;
+    --on-neon:#0A0A14;
+
+    /* Amber, used only for "this isn't real" labelling — kept apart from
+       the two brand neons so it never reads as a product feature. */
+    --flag:#FFB020;
+
+    --glass-bg:linear-gradient(155deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025));
+    --glass-border:rgba(255,255,255,0.16);
+    --glass-shadow:0 24px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.14);
+
+    --font-ui:-apple-system,"Segoe UI Variable Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
+    --font-mono:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,Menlo,monospace;
+
+    --gutter:clamp(20px,5vw,40px);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%}
+  body{
+    margin:0;overflow-x:hidden;width:100%;
+    background:
+      radial-gradient(640px circle at 85% 4%, rgba(79,140,255,0.20), transparent 60%),
+      radial-gradient(600px circle at 8% 40%, rgba(178,108,255,0.16), transparent 60%),
+      radial-gradient(620px circle at 88% 85%, rgba(79,140,255,0.13), transparent 60%),
+      var(--ground);
+    color:var(--ink-soft);
+    font-family:var(--font-ui);font-size:1.0625rem;line-height:1.6;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  }
+  .page{
+    max-width:1100px;margin:0 auto;
+    padding:0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+  }
+
+  h1,h2,h3{color:var(--ink);font-family:var(--font-ui);font-weight:800;letter-spacing:-0.015em;text-wrap:balance;margin:0}
+  h1{font-size:clamp(1.9rem,5vw,2.75rem);line-height:1.1}
+  h2{font-size:1.25rem;line-height:1.2}
+  h3{font-size:1rem;line-height:1.3}
+  p{margin:0}
+  strong,b{color:var(--ink);font-weight:700}
+
+  .eyebrow{
+    display:block;font-family:var(--font-mono);font-size:0.75rem;font-weight:600;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--ink-faint);
+  }
+  a{color:var(--neon-blue-soft);text-underline-offset:3px}
+  a:hover{color:var(--ink)}
+  :focus-visible{outline:2px solid var(--neon-blue-soft);outline-offset:3px;border-radius:2px}
+  button{font-family:inherit}
+
+  .glass{
+    background:var(--glass-bg);
+    -webkit-backdrop-filter:blur(26px) saturate(160%);
+    backdrop-filter:blur(26px) saturate(160%);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow);
+    border-radius:18px;
+  }
+
+  /* ---- masthead ---- */
+  .masthead{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:26px 0 0}
+  .wordmark{font-family:var(--font-ui);font-size:1rem;font-weight:800;color:var(--ink);text-decoration:none}
+  .wordmark:hover{color:var(--neon-blue-soft)}
+  .masthead a.back{font-size:0.8125rem;color:var(--ink-faint);text-decoration:none;font-family:var(--font-mono)}
+  .masthead a.back:hover{color:var(--ink)}
+
+  /* ---- hero ---- */
+  header.title{padding:clamp(36px,6vw,60px) 0 0;max-width:60ch}
+  header.title h1{margin-top:14px}
+  .lede{font-size:1.1875rem;line-height:1.5;color:var(--ink-soft);margin-top:18px;max-width:56ch}
+
+  /* This is the loudest of the three "not the real thing" notices — see
+     the file comment above. The other two are on the popup itself and in
+     the share preview's footer, so it's visible however far someone
+     scrolls or whatever they're looking at. */
+  .demo-notice{
+    margin-top:26px;padding:14px 18px;display:flex;gap:10px;align-items:flex-start;
+    background:rgba(255,176,32,0.08);border:1px solid rgba(255,176,32,0.35);border-radius:12px;
+    max-width:64ch;
+  }
+  .demo-notice svg{width:18px;height:18px;flex:0 0 auto;margin-top:1px;color:var(--flag)}
+  .demo-notice p{font-size:0.875rem;color:var(--ink-soft);line-height:1.5}
+  .demo-notice b{color:var(--flag)}
+
+  /* ---- checklist ---- */
+  .checklist{
+    margin-top:32px;padding:18px 20px;display:flex;flex-direction:column;gap:2px;max-width:64ch;
+  }
+  .checklist-title{font-size:0.8125rem;font-weight:700;color:var(--ink);letter-spacing:0.01em;margin-bottom:8px}
+  .checklist li{
+    list-style:none;display:flex;align-items:flex-start;gap:10px;padding:8px 0;
+    font-size:0.9375rem;color:var(--ink-faint);
+  }
+  .checklist ol{margin:0;padding:0}
+  .check-mark{
+    width:19px;height:19px;border-radius:50%;flex:0 0 auto;margin-top:1px;
+    border:1.5px solid var(--rule-strong);display:flex;align-items:center;justify-content:center;
+  }
+  .check-mark svg{width:10px;height:10px;opacity:0;color:var(--on-neon)}
+  .checklist li.done{color:var(--ink-soft)}
+  .checklist li.done .check-mark{background:var(--neon-blue);border-color:var(--neon-blue)}
+  .checklist li.done .check-mark svg{opacity:1}
+  .checklist li.current{color:var(--ink)}
+  .checklist li.current .check-mark{border-color:var(--neon-blue-soft)}
+
+  /* ---- demo grid: form + popup ---- */
+  .demo-grid{
+    margin-top:36px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,330px);
+    gap:clamp(20px,3vw,32px);align-items:start;
+  }
+  @media (max-width:820px){ .demo-grid{grid-template-columns:1fr} }
+
+  /* The form itself: a bright, ordinary-looking page, same trick as the
+     landing hero — the product's chrome is the futuristic part, the form
+     underneath should look like every other form you've filled in. */
+  .demo-form-wrap{padding:0;overflow:hidden}
+  .demo-form-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 18px;border-bottom:1px solid var(--rule-strong);
+  }
+  .demo-form-bar .dots{display:flex;gap:6px}
+  .demo-form-bar .dot{width:8px;height:8px;border-radius:50%}
+  .page-indicator{font-family:var(--font-mono);font-size:0.75rem;color:var(--ink-faint);letter-spacing:0.04em}
+  .demo-form{background:#F4F6FB;padding:clamp(20px,4vw,32px)}
+  .demo-form h2{color:#1B2233;font-size:1.0625rem}
+  .demo-form .sub{color:#5B6472;font-size:0.8125rem;margin-top:4px}
+  .fields{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:520px){ .fields{grid-template-columns:1fr} }
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:0.8125rem;font-weight:600;color:#333B4C}
+  .field input{
+    padding:10px 12px;border-radius:8px;border:1px solid #D7DCE8;background:#fff;
+    font-size:0.9375rem;color:#1B2233;font-family:var(--font-ui);width:100%;
+  }
+  .field input:focus{outline:2px solid #4F8CFF;outline-offset:1px;border-color:transparent}
+  .form-actions{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .form-actions .ghost{
+    padding:9px 16px;border-radius:8px;border:1px solid #C9D0DE;background:#fff;color:#333B4C;
+    font-size:0.8125rem;font-weight:600;cursor:pointer;
+  }
+  .form-actions .ghost:hover{background:#EDF0F6}
+  .form-actions .ghost:disabled{opacity:0.45;cursor:not-allowed}
+  .form-actions .primary{
+    padding:9px 16px;border-radius:8px;border:none;background:#1B2233;color:#fff;
+    font-size:0.8125rem;font-weight:600;cursor:pointer;
+  }
+  .form-actions .primary:hover{background:#333B4C}
+  .form-actions .primary:disabled{opacity:0.4;cursor:not-allowed}
+  .reset-hint{margin-top:16px;font-size:0.8125rem;color:#6B7280;line-height:1.5}
+  .reset-hint button{
+    background:none;border:none;padding:0;color:#2B62D9;font-weight:600;cursor:pointer;
+    font-size:inherit;text-decoration:underline;text-underline-offset:2px;
+  }
+
+  /* ---- the mock popup ---- */
+  .mock-popup{padding:0;overflow:hidden}
+  .popup-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 16px;border-bottom:1px solid var(--rule);
+  }
+  .popup-brand{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:0.9375rem}
+  .demo-tag{
+    font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:0.08em;
+    color:var(--on-neon);background:var(--flag);padding:2px 8px;border-radius:999px;
+  }
+  .popup-body{padding:16px}
+  .popup-status{font-size:0.875rem;color:var(--ink-soft)}
+  .popup-status b{color:var(--ink)}
+  .popup-actions{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .popbtn{
+    padding:10px 14px;border-radius:10px;font-size:0.8125rem;font-weight:700;cursor:pointer;
+    border:1px solid transparent;text-align:left;font-family:var(--font-ui);
+  }
+  .popbtn-primary{background:linear-gradient(100deg, var(--neon-blue), #6C7BFF);color:var(--on-neon)}
+  .popbtn-primary:hover{filter:brightness(1.08)}
+  .popbtn-quiet{background:rgba(255,255,255,0.05);color:var(--ink);border-color:var(--rule-strong)}
+  .popbtn-quiet:hover{background:rgba(255,255,255,0.09)}
+  .popbtn:disabled{opacity:0.4;cursor:not-allowed}
+  .popup-flash{
+    margin-top:10px;font-size:0.8125rem;color:var(--neon-blue-soft);min-height:1.2em;
+  }
+  .popup-flash.err{color:var(--flag)}
+  .saved-summary{margin-top:16px;padding-top:14px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
+  .saved-summary .row{display:flex;justify-content:space-between;gap:10px;font-size:0.8125rem;color:var(--ink-faint)}
+  .saved-summary .row b{color:var(--ink-soft);font-weight:600}
+  .saved-summary .yes{color:var(--neon-blue-soft)}
+
+  /* ---- share preview ---- */
+  .share-preview{margin-top:20px;padding:0;overflow:hidden;display:none}
+  .share-preview.show{display:block}
+  .share-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:16px 18px;border-bottom:1px solid var(--rule);
+  }
+  .share-head h3{color:var(--ink)}
+  .share-close{
+    background:none;border:none;color:var(--ink-faint);font-size:1.25rem;line-height:1;cursor:pointer;padding:2px 6px;
+  }
+  .share-close:hover{color:var(--ink)}
+  .share-body{padding:16px 18px}
+  .share-row{padding:10px 0;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:4px}
+  .share-row:last-child{border-bottom:none}
+  .share-cap{font-size:0.75rem;color:var(--ink-faint);display:flex;align-items:center;gap:8px}
+  .share-val{font-family:var(--font-mono);font-size:0.8125rem;color:var(--ink)}
+  .chip{
+    font-size:9px;letter-spacing:0.07em;text-transform:uppercase;font-weight:700;color:var(--on-neon);
+    background:var(--neon-violet-soft);border-radius:999px;padding:2px 7px;font-family:var(--font-mono);
+  }
+  .redact{
+    display:inline-block;position:relative;background:rgba(6,7,12,0.7);color:transparent;
+    border:1px solid var(--rule-strong);border-radius:4px;padding:1px 4px;user-select:none;
+  }
+  .redact::after{
+    content:"";position:absolute;inset:0;border-radius:4px;
+    background:repeating-linear-gradient(-45deg,transparent 0 5px,rgba(255,255,255,.06) 5px 10px);
+  }
+  .share-foot{
+    padding:14px 18px;border-top:1px solid rgba(255,176,32,0.3);background:rgba(255,176,32,0.06);
+    font-size:0.8125rem;color:var(--ink-soft);line-height:1.5;
+  }
+  .share-foot b{color:var(--flag)}
+  .share-empty{padding:16px 18px;font-size:0.875rem;color:var(--ink-faint)}
+
+  /* ---- close ---- */
+  .close-band{margin-top:56px;padding:clamp(28px,5vw,44px) 0 clamp(56px,8vw,88px);border-top:1px solid var(--rule)}
+  .close-inner{display:flex;flex-direction:column;gap:14px;align-items:flex-start;max-width:56ch}
+  .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:6px}
+  .btn{
+    display:inline-block;padding:12px 20px;border-radius:12px;font-size:0.8125rem;font-weight:700;
+    text-decoration:none;border:1px solid transparent;
+  }
+  .btn-primary{background:linear-gradient(100deg, var(--neon-blue), #6C7BFF);color:var(--on-neon);box-shadow:0 8px 26px rgba(79,140,255,0.32)}
+  .btn-quiet{background:rgba(255,255,255,0.04);color:var(--ink);border-color:var(--rule-strong)}
+
+  footer{
+    border-top:1px solid var(--rule);padding:26px 0 max(60px, calc(24px + env(safe-area-inset-bottom)));
+    font-size:0.8125rem;color:var(--ink-faint);font-family:var(--font-mono);
+    display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-between;align-items:baseline;
+  }
+  footer a{color:var(--ink-faint);text-decoration:none}
+  footer a:hover{color:var(--ink)}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="masthead">
+    <a class="wordmark" href="/">Form For Later</a>
+    <a class="back" href="/">&larr; Back to the site</a>
+  </div>
+
+  <header class="title">
+    <span class="eyebrow">Try it &mdash; no install needed</span>
+    <h1>See it work, right here.</h1>
+    <p class="lede">A real two-page form below, and a stand-in for the
+    popup next to it. Fill something in, save it, watch it disappear like
+    you'd closed the tab, then bring it back. Then see what a share link
+    leaves out.</p>
+  </header>
+
+  <div class="demo-notice">
+    <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/><line x1="10" y1="6.5" x2="10" y2="10.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="13.6" r="0.9" fill="currentColor"/></svg>
+    <p><b>This is a demo, not the real extension.</b> The popup on this
+    page is a stand-in built for this page &mdash; it isn't installed in
+    your browser and can't touch any other site. Nothing you type below
+    is stored anywhere. It lives in this tab's memory only, and it's gone
+    the moment you reload or leave.</p>
+  </div>
+
+  <div class="checklist glass">
+    <span class="checklist-title">Along the way</span>
+    <ol id="checklist">
+      <li data-flag="typed"><span class="check-mark"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5 L5 9.5 L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Type a few answers into the form.</li>
+      <li data-flag="saved1"><span class="check-mark"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5 L5 9.5 L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Click <b>Save what I've typed</b> in the popup.</li>
+      <li data-flag="cleared"><span class="check-mark"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5 L5 9.5 L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Simulate coming back later &mdash; the form clears.</li>
+      <li data-flag="restored"><span class="check-mark"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5 L5 9.5 L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Click <b>Restore</b>. Watch your answers come back.</li>
+      <li data-flag="saved2"><span class="check-mark"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5 L5 9.5 L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Go to page 2, fill it in, and save that too.</li>
+      <li data-flag="shared"><span class="check-mark"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5 L5 9.5 L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Click <b>Create share link</b> and see two fields held back.</li>
+    </ol>
+  </div>
+
+  <div class="demo-grid">
+    <div class="demo-form-wrap glass">
+      <div class="demo-form-bar">
+        <div class="dots">
+          <span class="dot" style="background:#FF6B6B"></span>
+          <span class="dot" style="background:#FFD166"></span>
+          <span class="dot" style="background:#4F8CFF"></span>
+        </div>
+        <span class="page-indicator" id="pageIndicator">PAGE 1 OF 2</span>
+      </div>
+
+      <div class="demo-form">
+        <div id="page1Fields">
+          <h2>Community Support Grant &mdash; Applicant details</h2>
+          <p class="sub">Page 1 of 2</p>
+          <div class="fields">
+            <div class="field"><label for="p1-fullname">Full name</label><input type="text" id="p1-fullname" data-key="fullname" data-label="Full name" placeholder="Jamie Rivera" autocomplete="off"></div>
+            <div class="field"><label for="p1-email">Email address</label><input type="text" id="p1-email" data-key="email" data-label="Email address" placeholder="jamie@example.com" autocomplete="off"></div>
+            <div class="field"><label for="p1-dob">Date of birth</label><input type="text" id="p1-dob" data-key="dob" data-label="Date of birth" placeholder="14 March 1990" autocomplete="off"></div>
+            <div class="field"><label for="p1-address">Home address</label><input type="text" id="p1-address" data-key="address" data-label="Home address" placeholder="44 Ashcroft Road, Leeds" autocomplete="off"></div>
+          </div>
+        </div>
+
+        <div id="page2Fields" style="display:none">
+          <h2>Community Support Grant &mdash; Employment details</h2>
+          <p class="sub">Page 2 of 2</p>
+          <div class="fields">
+            <div class="field"><label for="p2-employer">Employer name</label><input type="text" id="p2-employer" data-key="employer" data-label="Employer name" placeholder="Northwind Traders" autocomplete="off"></div>
+            <div class="field"><label for="p2-title">Job title</label><input type="text" id="p2-title" data-key="title" data-label="Job title" placeholder="Warehouse supervisor" autocomplete="off"></div>
+            <div class="field"><label for="p2-startdate">Start date</label><input type="text" id="p2-startdate" data-key="startdate" data-label="Start date" placeholder="3 June 2021" autocomplete="off"></div>
+            <div class="field"><label for="p2-reference">Reference contact</label><input type="text" id="p2-reference" data-key="reference" data-label="Reference contact" placeholder="Priya Shah, HR manager" autocomplete="off"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="ghost" id="prevPageBtn" disabled>&larr; Page 1</button>
+          <button class="ghost" id="nextPageBtn">Page 2 &rarr;</button>
+          <button class="primary" id="submitBtn" type="button">Submit application</button>
+        </div>
+
+        <p class="reset-hint">Pretend you've closed this tab and come back
+        tomorrow: <button id="resetPageBtn" type="button">simulate leaving and coming back to this page</button>.
+        It only clears what's on screen &mdash; nothing about Save or
+        Restore below.</p>
+      </div>
+    </div>
+
+    <div class="mock-popup glass">
+      <div class="popup-head">
+        <span class="popup-brand">FormForLater</span>
+        <span class="demo-tag">DEMO POPUP</span>
+      </div>
+      <div class="popup-body">
+        <p class="popup-status" id="popupStatus">0 filled answers found</p>
+        <div class="popup-actions">
+          <button class="popbtn popbtn-primary" id="saveBtn">Save what I've typed</button>
+          <button class="popbtn popbtn-quiet" id="restoreBtn" disabled>Restore answers here</button>
+          <button class="popbtn popbtn-quiet" id="shareBtn" disabled>Create share link</button>
+        </div>
+        <p class="popup-flash" id="popupFlash" role="status"></p>
+
+        <div class="saved-summary">
+          <div class="row"><span>Page 1</span><b id="sum1">not saved yet</b></div>
+          <div class="row"><span>Page 2</span><b id="sum2">not saved yet</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="share-preview glass" id="sharePreview">
+    <div class="share-head">
+      <h3>Share preview (demo)</h3>
+      <button class="share-close" id="shareCloseBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="share-body" id="shareBody"></div>
+    <div class="share-foot"><b>Not a real link.</b> This is what a
+    recipient's screen would show &mdash; nothing here is actually
+    encrypted, sent, or shareable. It exists only to show what's left out.</div>
+  </div>
+
+  <div class="close-band">
+    <div class="close-inner">
+      <span class="eyebrow">Ready for the real thing?</span>
+      <h2>Same idea, running for real in your browser.</h2>
+      <p style="color:var(--ink-soft);font-size:0.9375rem">The real extension saves for real, on your device, and keeps working after you close this tab &mdash; this page can't do either.</p>
+      <div class="actions">
+        <!-- TODO: Chrome Web Store URL, once the listing is live. -->
+        <a class="btn btn-primary" href="/#install">Add to Chrome</a>
+        <a class="btn btn-quiet" href="/">Back to the site</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="page" style="display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-between;width:100%">
+    <span>FORM FOR LATER &mdash; KEPT ON THE DEVICE YOU FILLED IT IN ON.</span>
+    <a href="/privacy">Privacy policy</a>
+  </div>
+</footer>
+
+<script>
+/* The whole of this page's JavaScript. Everything lives in `state` below,
+   a plain object in memory — nothing is written to localStorage,
+   sessionStorage, a cookie, or any server. Reload this page and every
+   field, every save, is gone, the same as if you'd never opened it.
+   No analytics, no external script, no network request of any kind. */
+(function () {
+  'use strict';
+
+  var REDACT_KEYS = { address: true, reference: true };
+  var LABELS = {};
+  document.querySelectorAll('.demo-form input[data-key]').forEach(function (el) {
+    LABELS[el.dataset.key] = el.dataset.label;
+  });
+
+  var state = {
+    page: 1,
+    saved: {},
+    flags: { typed: false, saved1: false, cleared: false, restored: false, saved2: false, shared: false }
+  };
+
+  var el = {
+    page1: document.getElementById('page1Fields'),
+    page2: document.getElementById('page2Fields'),
+    indicator: document.getElementById('pageIndicator'),
+    prevBtn: document.getElementById('prevPageBtn'),
+    nextBtn: document.getElementById('nextPageBtn'),
+    resetBtn: document.getElementById('resetPageBtn'),
+    saveBtn: document.getElementById('saveBtn'),
+    restoreBtn: document.getElementById('restoreBtn'),
+    shareBtn: document.getElementById('shareBtn'),
+    popupStatus: document.getElementById('popupStatus'),
+    popupFlash: document.getElementById('popupFlash'),
+    sum1: document.getElementById('sum1'),
+    sum2: document.getElementById('sum2'),
+    checklist: document.getElementById('checklist'),
+    sharePreview: document.getElementById('sharePreview'),
+    shareBody: document.getElementById('shareBody'),
+    shareCloseBtn: document.getElementById('shareCloseBtn')
+  };
+
+  function fieldsForPage(n) {
+    return Array.prototype.slice.call((n === 1 ? el.page1 : el.page2).querySelectorAll('input[data-key]'));
+  }
+
+  function countFilled(n) {
+    return fieldsForPage(n).filter(function (i) { return i.value.trim().length > 0; }).length;
+  }
+
+  function flash(msg, isErr) {
+    el.popupFlash.textContent = msg;
+    el.popupFlash.className = 'popup-flash' + (isErr ? ' err' : '');
+  }
+
+  function updatePopupStatus() {
+    var n = countFilled(state.page);
+    el.popupStatus.innerHTML = '';
+    var b = document.createElement('b');
+    b.textContent = String(n);
+    el.popupStatus.appendChild(b);
+    el.popupStatus.appendChild(document.createTextNode(' filled answer' + (n === 1 ? '' : 's') + ' found'));
+    el.restoreBtn.disabled = !state.saved[state.page];
+    el.shareBtn.disabled = !(state.saved[1] || state.saved[2]);
+  }
+
+  function renderSavedSummary() {
+    el.sum1.textContent = state.saved[1] ? state.saved[1].length + ' answers saved' : 'not saved yet';
+    el.sum1.className = state.saved[1] ? 'yes' : '';
+    el.sum2.textContent = state.saved[2] ? state.saved[2].length + ' answers saved' : 'not saved yet';
+    el.sum2.className = state.saved[2] ? 'yes' : '';
+  }
+
+  function renderChecklist() {
+    var items = Array.prototype.slice.call(el.checklist.children);
+    var currentSet = false;
+    items.forEach(function (li) {
+      var flag = li.dataset.flag;
+      var done = !!state.flags[flag];
+      li.classList.toggle('done', done);
+      li.classList.toggle('current', !done && !currentSet);
+      if (!done) currentSet = true;
+    });
+  }
+
+  function renderAll() {
+    updatePopupStatus();
+    renderSavedSummary();
+    renderChecklist();
+  }
+
+  function goToPage(n) {
+    state.page = n;
+    el.page1.style.display = n === 1 ? '' : 'none';
+    el.page2.style.display = n === 2 ? '' : 'none';
+    el.indicator.textContent = 'PAGE ' + n + ' OF 2';
+    el.prevBtn.disabled = n === 1;
+    el.nextBtn.disabled = n === 2;
+    flash('');
+    renderAll();
+  }
+
+  el.prevBtn.addEventListener('click', function () { if (state.page > 1) goToPage(state.page - 1); });
+  el.nextBtn.addEventListener('click', function () { if (state.page < 2) goToPage(state.page + 1); });
+
+  document.querySelectorAll('.demo-form input[data-key]').forEach(function (input) {
+    input.addEventListener('input', function () {
+      if (input.value.trim().length > 0) state.flags.typed = true;
+      updatePopupStatus();
+      renderChecklist();
+    });
+  });
+
+  el.saveBtn.addEventListener('click', function () {
+    var fields = fieldsForPage(state.page)
+      .filter(function (i) { return i.value.trim().length > 0; })
+      .map(function (i) { return { key: i.dataset.key, label: LABELS[i.dataset.key], value: i.value.trim() }; });
+    if (!fields.length) { flash("Type something first — there's nothing to save yet.", true); return; }
+    state.saved[state.page] = fields;
+    state.flags['saved' + state.page] = true;
+    flash('Saved ' + fields.length + ' answer' + (fields.length === 1 ? '' : 's') + '.');
+    renderAll();
+  });
+
+  el.resetBtn.addEventListener('click', function () {
+    fieldsForPage(state.page).forEach(function (i) { i.value = ''; });
+    state.flags.cleared = true;
+    flash('Form cleared — as if you had just reopened this page.');
+    renderAll();
+  });
+
+  el.restoreBtn.addEventListener('click', function () {
+    var saved = state.saved[state.page];
+    if (!saved) { flash('Nothing saved for this page yet — try Save first.', true); return; }
+    saved.forEach(function (f) {
+      var input = fieldsForPage(state.page).find(function (i) { return i.dataset.key === f.key; });
+      if (input) input.value = f.value;
+    });
+    state.flags.restored = true;
+    flash('Restored ' + saved.length + ' answer' + (saved.length === 1 ? '' : 's') + '.');
+    renderAll();
+  });
+
+  el.submitBtn = document.getElementById('submitBtn');
+  el.submitBtn.addEventListener('click', function () {
+    flash("This demo doesn't submit anywhere — try Save and Restore instead.", true);
+  });
+
+  function buildShareRow(field) {
+    var row = document.createElement('div');
+    row.className = 'share-row';
+    var cap = document.createElement('div');
+    cap.className = 'share-cap';
+    var capText = document.createElement('span');
+    capText.textContent = field.label;
+    cap.appendChild(capText);
+    if (REDACT_KEYS[field.key]) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = 'held back';
+      cap.appendChild(chip);
+    }
+    var val = document.createElement('div');
+    val.className = 'share-val';
+    if (REDACT_KEYS[field.key]) {
+      var redact = document.createElement('span');
+      redact.className = 'redact';
+      redact.textContent = field.value; /* length-preserving, same as the real viewer — see .redact::after */
+      val.appendChild(redact);
+    } else {
+      val.textContent = field.value;
+    }
+    row.appendChild(cap);
+    row.appendChild(val);
+    return row;
+  }
+
+  el.shareBtn.addEventListener('click', function () {
+    var all = (state.saved[1] || []).concat(state.saved[2] || []);
+    el.shareBody.innerHTML = '';
+    if (!all.length) {
+      var empty = document.createElement('p');
+      empty.className = 'share-empty';
+      empty.textContent = 'Nothing saved yet — save at least one page first.';
+      el.shareBody.appendChild(empty);
+    } else {
+      all.forEach(function (f) { el.shareBody.appendChild(buildShareRow(f)); });
+    }
+    el.sharePreview.classList.add('show');
+    el.sharePreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    state.flags.shared = true;
+    renderChecklist();
+  });
+
+  el.shareCloseBtn.addEventListener('click', function () {
+    el.sharePreview.classList.remove('show');
+  });
+
+  goToPage(1);
+  renderAll();
+})();
+</script>
+
+</body>
+</html>

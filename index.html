@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Form For Later</title>
 <meta name="description" content="FormForLater saves what you type into long forms, puts it back in one click, and can hand part of it to someone else with an encrypted link that expires. Everything stays on your device.">
 <style>
@@ -64,9 +64,15 @@
   }
 
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
+  /* Belt and suspenders against horizontal overflow on the page itself.
+     Nothing here is meant to scroll sideways — the few elements that
+     legitimately need to (the hero device, in its own overflow-x:auto)
+     already contain that scrolling internally. This just guarantees the
+     page can't also do it, whatever the cause, on engines this was never
+     tested against directly. */
+  html{-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%}
   body{
-    margin:0;
+    margin:0;overflow-x:hidden;width:100%;
     /* Soft colour blooms placed down the length of the page rather than
        one gradient at the top, so the glow keeps showing up as you
        scroll instead of fading out after the hero. */
@@ -85,7 +91,13 @@
     -moz-osx-font-smoothing:grayscale;
   }
 
-  .page{max-width:1060px;margin:0 auto;padding:0 var(--gutter)}
+  /* The extra max() on each side is the safe-area inset — the notch and
+     the home-indicator's rounded corners on an iPhone with viewport-fit
+     cover in the meta tag above. Zero on any device without one. */
+  .page{
+    max-width:1060px;margin:0 auto;
+    padding:0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+  }
   .measure{max-width:var(--measure)}
 
   h1,h2,h3{color:var(--ink);font-family:var(--font-ui);font-weight:800;letter-spacing:-0.02em;text-wrap:balance;margin:0}
@@ -160,7 +172,11 @@
   .aside{font-size:var(--step--1);color:var(--ink-faint);font-family:var(--font-mono)}
 
   /* ---- hero device: an actual-looking form, not a diagram ---------- */
-  .hero-art{padding:clamp(16px,3vw,26px);overflow-x:auto}
+  /* min-width:0 overrides the flex item's default auto-sizing, which
+     otherwise lets the wide content below (.states, forced to 760px on
+     larger screens) push this box wider than its flex container instead
+     of scrolling inside it — the classic flexbox-plus-overflow trap. */
+  .hero-art{padding:clamp(16px,3vw,26px);overflow-x:auto;min-width:0}
   .device-bar{display:flex;align-items:center;gap:10px;padding:2px 6px 16px}
   .device-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
   .device-url{
@@ -343,7 +359,7 @@
 
   /* ---- close -------------------------------------------------------- */
   .close{display:flex;flex-direction:column;gap:20px;align-items:flex-start}
-  footer{border-top:1px solid var(--rule);padding:30px 0 60px}
+  footer{border-top:1px solid var(--rule);padding:30px 0 max(60px, calc(24px + env(safe-area-inset-bottom)))}
   .foot-inner{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:baseline;justify-content:space-between}
   footer .note{font-size:var(--step--1);color:var(--ink-faint);max-width:46ch;margin:0;font-family:var(--font-mono)}
   footer nav{display:flex;gap:20px;font-size:var(--step--1)}
@@ -357,6 +373,29 @@
     .ios-cta{align-items:stretch}
   }
 
+  /* ---- card paging, phones only --------------------------------------- */
+  /* Each top-level section becomes one screen-filling panel, and flicking
+     settles on the next one. scroll-snap-type is "proximity", not
+     "mandatory": a panel taller than the screen (the hero, the privacy
+     spec sheet) just scrolls normally through its own content, and only
+     snaps once the edge of the next one comes close — nothing forces a
+     mid-read jump. This is pure CSS: anchor links and Tab/PageDown still
+     land exactly where they always did, and get the snap alignment as a
+     bonus rather than a dependency. Desktop is untouched — the whole
+     block is gated to narrow screens.
+
+     Left out of the snap set on purpose: the masthead strip (too short to
+     be its own "screen") and the footer (naturally short; forcing it to
+     fill the screen would leave a mostly empty panel at the very end). */
+  @media (max-width:640px) and (prefers-reduced-motion:no-preference){
+    html{scroll-snap-type:y proximity}
+    header,.ios-banner,section.band{
+      scroll-snap-align:start;
+      min-height:100vh;min-height:100dvh;
+      display:flex;flex-direction:column;justify-content:center;
+    }
+  }
+
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -368,6 +407,7 @@
     <nav>
       <a href="#how">How it works</a>
       <a href="#sharing">Sharing</a>
+      <a href="/demo">Demo</a>
       <a href="#ios">iPhone</a>
       <a href="#privacy">Privacy</a>
     </nav>
@@ -519,6 +559,15 @@
         <p>Every saved answer goes back where it was, and it tells you if
         it had to guess.</p>
       </div>
+    </div>
+
+    <div class="panel-note glass">
+      <h3>Works across pages, too.</h3>
+      <p>A lot of long forms aren't one page &mdash; they're five or six,
+      filled in over several days. FormForLater keeps each page as its own
+      step in the same record. Fill in a five-page application over three
+      days. Get all five pages back, each one restored on the page it
+      belongs to. The iPhone app will do the same when it ships.</p>
     </div>
   </div>
 </section>
@@ -764,6 +813,7 @@
   <div class="page foot-inner">
     <p class="note">FORM FOR LATER &mdash; KEPT ON THE DEVICE YOU FILLED IT IN ON.</p>
     <nav>
+      <a href="/demo">Try the demo</a>
       <a href="/privacy">Privacy policy</a>
       <a href="/waitlist">iOS waitlist</a>
       <a href="https://share.formforlater.com/">Share links</a>
